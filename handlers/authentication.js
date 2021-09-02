@@ -177,16 +177,10 @@ const requestResetPasswordToken = async (request, reply) => {
 		sendErrorResponse(
 			reply,
 			400,
-			"User does not exist or email is not verified yet",
-			configs.APP_RESET_PASSWORD_REDIRECT
+			"User does not exist or email is not verified yet"
 		);
 	} else if (!user.isPwResetTokenExpired()) {
-		sendErrorResponse(
-			reply,
-			400,
-			"Please check your email, try again later",
-			configs.APP_RESET_PASSWORD_REDIRECT
-		);
+		sendErrorResponse(reply, 400, "Please check your email, try again later");
 	} else {
 		const pwResetToken = user.getPwResetToken();
 		const resetUrl = `${request.protocol}://${request.hostname}/api/v1/auth/resetPassword?token=${pwResetToken}`;
