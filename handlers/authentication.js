@@ -84,20 +84,22 @@ const signin = async (request, reply) => {
 		if (await user.matchPasswd(password)) {
 			const refreshToken = await getRefreshToken(user, request.ip);
 
-			await sendEmail({
-				email: user.email,
-				subject: `Important : New Login to your ${configs.APP_NAME} account`,
-				html: renderTemplate(
-					{
-						username: user.name,
-						appName: configs.APP_NAME,
-						appDomain: configs.APP_DOMAIN,
-						ip: request.ip,
-						ua: request.headers["user-agent"],
-					},
-					newLoginTemplate
-				),
-			});
+			if (configs.SEND_NEW_LOGIN_EMAIL) {
+				await sendEmail({
+					email: user.email,
+					subject: `Important : New Login to your ${configs.APP_NAME} account`,
+					html: renderTemplate(
+						{
+							username: user.name,
+							appName: configs.APP_NAME,
+							appDomain: configs.APP_DOMAIN,
+							ip: request.ip,
+							ua: request.headers["user-agent"],
+						},
+						newLoginTemplate
+					),
+				});
+			}
 
 			sendSuccessResponse(reply, {
 				statusCode: 200,
@@ -297,7 +299,13 @@ const getJWTFromRefresh = async (request, reply) => {
 	if (rft.isExpired()) {
 		sendErrorResponse(reply, 400, "Refresh Token Expired");
 	}
-	const jwtToken = rft.user.getJWT();
+	const user = await User.findById(rft.user);
+
+	if (!user) {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+	}
+
+	const jwtToken = user.getJWT();
 	rft.revoke(request.ip);
 	rft.save();
 	const newRefreshToken = await getRefreshToken(user, request.ip);
@@ -318,13 +326,25 @@ const revokeRefreshToken = async (request, reply) => {
 		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
 		isRevoked: false,
 	});
+
 	if (!rft) {
 		sendErrorResponse(reply, 400, "Invalid Refresh Token");
 	}
+
+	const user = await User.findById(rft.user);
+
+	if (!user) {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+	}
+
+	if (user.email !== request.user.email) {
+		// Check whether the refresh token was created by the same user
+		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+	}
+
 	if (rft.isExpired()) {
 		sendErrorResponse(reply, 400, "Refresh Token Expired");
 	}
-
 	rft.revoke(request.ip);
 	rft.save();
 	sendSuccessResponse(reply, {

@@ -134,11 +134,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		schema: {
 			body: authSchema.refreshTokenCheck,
 		},
-		preHandler: [
-			verifyAuth(["admin", "user"], false),
-			checkDeactivated,
-			checkEmailConfirmed,
-		],
+		preHandler: [verifyAuth(["admin", "user"], false), checkDeactivated],
 		handler: revokeRefreshToken,
 	});
 
@@ -148,8 +144,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		preHandler: [
 			verifyAuth(["admin", "user"], false),
 			checkDeactivated,
-			checkEmailConfirmed,
-			attachUser(false, true),
+			attachUser(false, false),
 		],
 		handler: revokeAllRefreshTokens,
 	});

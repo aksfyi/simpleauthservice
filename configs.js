@@ -6,6 +6,7 @@ const configs = {
 	CHECK_ADMIN: process.env.CHECK_ADMIN,
 	JWT_KEY: process.env.JWT_KEY,
 	PORT: process.env.PORT || 5000,
+	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL,
 
 	SMTP_HOST: process.env.SMTP_HOST,
 	SMTP_PORT: process.env.SMTP_PORT,

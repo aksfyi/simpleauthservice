@@ -35,22 +35,18 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!token) {
-			console.log("Error : token");
-
 			sendErrorResponse(reply, 400, "Invalid Token", redirectURL);
 		}
 
 		const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
 		if (type === "password") {
-			console.log("finding password token user");
 			user = await User.findOne({
 				pwResetToken: hashedToken,
 				isDeactivated: false,
 				isEmailConfirmed: true,
 			});
 		} else if (type === "confirmEmail") {
-			console.log("finding confirm email users");
 			user = await User.findOne({
 				confirmEmailToken: hashedToken,
 				isDeactivated: false,
@@ -59,7 +55,6 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!user) {
-			console.log("Error : user not found");
 			sendErrorResponse(reply, 400, "Invalid Token", redirectURL);
 		}
 		if (type === "password") {

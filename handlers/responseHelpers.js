@@ -25,6 +25,7 @@ const sendErrorResponse = (reply, statusCode, message, redirectURL) => {
 			`${redirectURL}?statusCode=${statusCode}&error=${error}&message=${message}&success=false`
 		);
 	}
+	reply.sent = true;
 };
 
 const sendSuccessResponse = (reply, response, redirectURL) => {
@@ -38,10 +39,12 @@ const sendSuccessResponse = (reply, response, redirectURL) => {
 			`${redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
 		);
 	}
+	reply.sent = true;
 };
 
 const redirectWithToken = (reply, token, redirectURL) => {
 	reply.redirect(`${redirectURL}?token=${token}&success=true`);
+	reply.sent = true;
 };
 
 module.exports = {

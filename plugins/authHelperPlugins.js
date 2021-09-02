@@ -1,4 +1,5 @@
 const { sendErrorResponse } = require("../handlers/responseHelpers");
+const User = require("../models/user");
 
 /**
  * This should be used only after the JWT tokens are verified
