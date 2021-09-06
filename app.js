@@ -1,17 +1,28 @@
-const fastify = require("fastify");
+const fastify = require("fastify")({ logger: true });
+const { configs } = require("./configs");
+const { connectDB } = require("./models/connectDB");
 const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
+const { getSwaggerOptions } = require("./utils/utils");
 
-const build = (optns = {}) => {
-	const app = fastify(optns);
+// Connect to MongoDB Database
+connectDB();
 
-	app.setErrorHandler(getErrorHandler(app));
+fastify.register(require("fastify-swagger"), getSwaggerOptions());
 
-	app.register(authenticationRoutes, { prefix: "api/v1/auth" });
+fastify.setErrorHandler(getErrorHandler(fastify));
 
-	return app;
+//	Register Routes required for authentication
+fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
+
+// Start the server
+const start = async () => {
+	try {
+		await fastify.listen(configs.PORT);
+		fastify.swagger();
+	} catch (err) {
+		fastify.log.error(err);
+		process.exit(1);
+	}
 };
-
-module.exports = {
-	build,
-};
+start();
