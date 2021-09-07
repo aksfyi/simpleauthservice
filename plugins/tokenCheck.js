@@ -5,10 +5,13 @@ const User = require("../models/user");
 
 const tokenCheck = (type, shouldRedirect) => {
 	return async function (request, reply) {
-		let { token } = request.query;
-		if (!token) {
+		let token;
+		if (request.method === "PUT" || request.method === "POST") {
 			token = request.body.token;
+		} else {
+			token = request.query.token;
 		}
+
 		let redirectURL;
 		let user;
 		let check = true;

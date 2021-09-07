@@ -21,9 +21,11 @@ const sendErrorResponse = (reply, statusCode, message, redirectURL) => {
 			success: false,
 		});
 	} else {
-		reply.redirect(
-			`${redirectURL}?statusCode=${statusCode}&error=${error}&message=${message}&success=false`
-		);
+		reply
+			.code(302)
+			.redirect(
+				`${redirectURL}?error=${error}&message=${message}&success=false`
+			);
 	}
 	reply.sent = true;
 };
@@ -35,15 +37,17 @@ const sendSuccessResponse = (reply, response, redirectURL) => {
 			success: true,
 		});
 	} else {
-		reply.redirect(
-			`${redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
-		);
+		reply
+			.code(302)
+			.redirect(
+				`${redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
+			);
 	}
 	reply.sent = true;
 };
 
 const redirectWithToken = (reply, token, redirectURL) => {
-	reply.redirect(`${redirectURL}?token=${token}&success=true`);
+	reply.code(302).redirect(`${redirectURL}?token=${token}&success=true`);
 	reply.sent = true;
 };
 

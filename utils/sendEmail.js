@@ -22,7 +22,6 @@ const sendEmail = async (options) => {
 
 		const msg = await transporter.sendMail(message);
 
-		console.log("EMAIL SENT : %s", msg.messageId);
 		return "Email Sent";
 	} else {
 		return "Failed to send email. Please configure SMTP";

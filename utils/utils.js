@@ -4,18 +4,20 @@ const getSwaggerOptions = () => {
 	SWAGGER_OPTIONS = {
 		swagger: {
 			info: {
-				title: "Test swagger",
-				description: "testing the fastify swagger api",
+				title: "simpleauth",
+				description:
+					"Simple Authentication Service API \nhttps://github.com/aksty-simpleauth\nhttps://github.com/aksty",
 				version: "0.1.0",
 			},
 			securityDefinitions: {
-				apiKey: {
+				JWTToken: {
+					description: 'Authorization header token, sample: "Bearer {token}"',
 					type: "apiKey",
-					name: "apiKey",
+					name: "Authorization",
 					in: "header",
 				},
 			},
-			host: `localhost:${configs.PORT}`,
+			//host: `localhost:${configs.PORT}`,
 			schemes: ["http"],
 			consumes: ["application/json"],
 			produces: ["application/json"],

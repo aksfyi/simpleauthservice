@@ -79,7 +79,7 @@ const signin = async (request, reply) => {
 		isDeactivated: false,
 	}).select("+password");
 	if (!user) {
-		sendErrorResponse(reply, 400, "User not found");
+		sendErrorResponse(reply, 404, "User not found");
 	} else {
 		if (await user.matchPasswd(password)) {
 			const refreshToken = await getRefreshToken(user, request.ip);
@@ -124,6 +124,9 @@ const confirmEmailTokenRedirect = async (request, reply) => {
 	);
 };
 
+// @route 	PUT /api/v1/auth/confirmEmail
+// @desc 	Route to confirm email address with the token
+// @access 	Public
 const confirmEmail = async (request, reply) => {
 	const user = request.userModel;
 	user.confirmEmailToken = undefined;
@@ -178,7 +181,7 @@ const requestResetPasswordToken = async (request, reply) => {
 	if (!user) {
 		sendErrorResponse(
 			reply,
-			400,
+			404,
 			"User does not exist or email is not verified yet"
 		);
 	} else if (!user.isPwResetTokenExpired()) {
@@ -238,9 +241,9 @@ const resetPasswordFromToken = async (request, reply) => {
 
 		password = await hashPasswd(password);
 		user.password = password;
-		//user.pwResetToken = undefined;
-		//user.pwResetExpire = undefined;
-		user.save();
+		user.pwResetToken = undefined;
+		user.pwResetExpire = undefined;
+		user.save({ validateBeforeSave: true });
 		await passwordChangedEmailAlert(user, request);
 
 		sendSuccessResponse(reply, {
@@ -283,6 +286,19 @@ const updatePassword = async (request, reply) => {
 	});
 };
 
+// @route 	PUT /api/v1/auth/profile
+// @desc 	Route used to get user Info
+// @access	Private(requires JWT token in header)
+const getProfile = async (request, reply) => {
+	const user = request.user;
+	console.log(user);
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: "User Found",
+		...user,
+	});
+};
+
 // @route 	/api/v1/auth/refresh
 // @desc 	Get new jwt token and refresh token from unused refresh token
 //		 	(refresh token should be used only once)
@@ -312,6 +328,7 @@ const getJWTFromRefresh = async (request, reply) => {
 
 	sendSuccessResponse(reply, {
 		statusCode: 200,
+		message: "Refresh token : successful",
 		token: jwtToken,
 		refreshToken: newRefreshToken,
 	});
@@ -414,4 +431,5 @@ module.exports = {
 	getJWTFromRefresh,
 	revokeRefreshToken,
 	revokeAllRefreshTokens,
+	getProfile,
 };

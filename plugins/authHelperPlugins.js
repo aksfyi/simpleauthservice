@@ -47,6 +47,13 @@ const attachUserWithPassword = (isDeactivated, isEmailConfirmed) => {
 	};
 };
 
+const checkPasswordLength = async (request, reply) => {
+	const password = request.body.password;
+	if (password.length < 8) {
+		sendErrorResponse(reply, 400, "Minimum password length should be 8");
+	}
+};
+
 const must = (reply, parameter, message) => {
 	if (!parameter) {
 		sendErrorResponse(reply, 400, message);
@@ -58,4 +65,5 @@ module.exports = {
 	checkEmailConfirmed,
 	attachUser,
 	attachUserWithPassword,
+	checkPasswordLength,
 };

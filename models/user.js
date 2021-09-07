@@ -2,7 +2,6 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const RefreshToken = require("../models/refreshToken");
 
 const userSchema = new mongoose.Schema({
 	name: {
@@ -37,17 +36,21 @@ const userSchema = new mongoose.Schema({
 	pwResetExpire: Date,
 	confirmEmailToken: String,
 	confirmEmailTokenExpire: Date,
-	isAccountVerified: {
-		type: Boolean,
-		default: false,
-	},
-	twoFACode: String, // No support as of now
-	twoFAExpire: Date, // No support as of now
-	twoFAEnabled: {
-		// No support as of now
-		type: Boolean,
-		default: false,
-	},
+
+	// No support as of now
+
+	// isAccountVerified: {
+	// 	type: Boolean,
+	// 	default: false,
+	// },
+	// twoFACode: String, // No support as of now
+	// twoFAExpire: Date, // No support as of now
+	// twoFAEnabled: {
+	// 	// No support as of now
+	// 	type: Boolean,
+	// 	default: false,
+	// },
+
 	isDeactivated: {
 		type: Boolean,
 		default: false,
@@ -68,7 +71,7 @@ userSchema.methods.getJWT = function () {
 			email: this.email,
 			name: this.name,
 			isEmailConfirmed: this.isEmailConfirmed,
-			isAccountVerified: this.isAccountVerified,
+			// isAccountVerified: this.isAccountVerified,
 			isDeactivated: this.isDeactivated,
 		},
 		process.env.JWT_KEY,
