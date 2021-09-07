@@ -10,7 +10,7 @@ const getErrorHandler = (fastify) => {
 		let message = "Error in the server";
 
 		//Send messages as response in development environment
-		if (configs.ENVIRONMENT === "dev") {
+		if (configs.ENVIRONMENT.toLowerCase() === "dev") {
 			message = err.message;
 		}
 

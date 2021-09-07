@@ -7,9 +7,9 @@ const { getSwaggerOptions } = require("./utils/utils");
 
 // Connect to MongoDB Database
 connectDB();
-
-fastify.register(require("fastify-swagger"), getSwaggerOptions());
-
+if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+	fastify.register(require("fastify-swagger"), getSwaggerOptions());
+}
 fastify.setErrorHandler(getErrorHandler(fastify));
 
 //	Register Routes required for authentication
@@ -19,7 +19,9 @@ fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
 const start = async () => {
 	try {
 		await fastify.listen(configs.PORT);
-		fastify.swagger();
+		if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+			fastify.swagger();
+		}
 	} catch (err) {
 		fastify.log.error(err);
 		process.exit(1);
