@@ -7,9 +7,20 @@ const { getSwaggerOptions } = require("./utils/utils");
 
 // Connect to MongoDB Database
 connectDB();
+
+// Enable swagger ui in development environment
 if (configs.ENVIRONMENT.toLowerCase() === "dev") {
 	fastify.register(require("fastify-swagger"), getSwaggerOptions());
 }
+
+// If cors is enabled then register CORS origin
+if (configs.ALLOW_CORS_ORIGIN) {
+	fastify.register(require("fastify-cors"), {
+		origin: configs.ALLOW_CORS_ORIGIN,
+	});
+}
+
+// Set error Handler
 fastify.setErrorHandler(getErrorHandler(fastify));
 
 //	Register Routes required for authentication

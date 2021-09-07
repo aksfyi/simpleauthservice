@@ -20,6 +20,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^10.0.0",
     "fastify": "^3.20.2",
+    "fastify-cors": "^6.0.2",
     "fastify-swagger": "^4.9.1",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.0.1",
