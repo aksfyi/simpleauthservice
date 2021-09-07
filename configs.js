@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const configs = {
 	MONGO_URI: process.env.MONGO_URI,
-	ENVIRONMENT: process.env.ENVIRONMENT,
+	ENVIRONMENT: process.env.ENVIRONMENT || "dev",
 	CHECK_ADMIN: process.env.CHECK_ADMIN,
 	JWT_KEY: process.env.JWT_KEY,
 	PORT: process.env.PORT || 5000,
