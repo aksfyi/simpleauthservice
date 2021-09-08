@@ -6,7 +6,7 @@ const { authenticationRoutes } = require("./routes/authentication");
 const { getSwaggerOptions } = require("./utils/utils");
 
 // Connect to MongoDB Database
-connectDB();
+connectDB(fastify);
 
 // Enable swagger ui in development environment
 if (configs.ENVIRONMENT.toLowerCase() === "dev") {

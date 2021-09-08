@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { configs } = require("../configs");
 
-const connectDB = async () => {
+const connectDB = async (fastify) => {
 	let options;
 	if (configs.MONGO_URI === "mongodb://localhost:27017/") {
 		options = {
@@ -18,7 +18,7 @@ const connectDB = async () => {
 	}
 	const conn = await mongoose.connect(configs.MONGO_URI, options);
 
-	console.log(`MongoDB Connected`);
+	fastify.log.info("Connected to MongoDB");
 };
 
 module.exports = {
