@@ -1,49 +1,7 @@
 const { configs } = require("../../configs");
+const { responseErrors, jwtSecurity, getSuccessObject } = require("./common");
 
-const getCommonProperties = (statusCode, successValue) => ({
-	statusCode: { type: "integer", example: statusCode },
-	message: { type: "string" },
-	success: { type: "boolean", example: successValue },
-});
-
-const getErrorProperties = (statusCode, successValue) => ({
-	...getCommonProperties(statusCode, successValue),
-	error: { type: "string" },
-});
-
-const getSuccessObject = (statusCode, successValue, description, props) => ({
-	type: "object",
-	description,
-	properties: { ...getCommonProperties(statusCode, successValue), ...props },
-});
-const errors = {
-	400: {
-		description: "Bad Request",
-		type: "object",
-		properties: getErrorProperties(400, false),
-	},
-	500: {
-		description: "Internal Server Error",
-		type: "object",
-		properties: getErrorProperties(500, false),
-	},
-	404: {
-		description: "Not found",
-		type: "object",
-		properties: getErrorProperties(404, false),
-	},
-};
-
-const security = [
-	{
-		JWTToken: {
-			description: 'Authorization header token, sample: "Bearer {token}"',
-			type: "apiKey",
-			name: "Authorization",
-			in: "header",
-		},
-	},
-];
+const errors = responseErrors;
 
 const authenticationSchema = {
 	signup: {
@@ -141,7 +99,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 		},
-		security,
+		security: jwtSecurity,
 	},
 	resetPasswordPost: {
 		description: "Request link for resetting password",
@@ -211,7 +169,7 @@ const authenticationSchema = {
 			},
 			required: ["currentPassword", "password", "confirmPassword"],
 		},
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Password Reset Successful", {}),
 			400: errors[400],
@@ -221,7 +179,7 @@ const authenticationSchema = {
 	profile: {
 		description: "Get profile information of the logged in user",
 		tags: ["User"],
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Get Profile Successful", {
 				role: { type: "string" },
@@ -244,7 +202,7 @@ const authenticationSchema = {
 			},
 			required: ["refreshToken"],
 		},
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
@@ -278,7 +236,7 @@ const authenticationSchema = {
 	revokeAll: {
 		description: "Revoke All refresh tokens of the logged in user",
 		tags: ["Refresh Token"],
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(
 				200,

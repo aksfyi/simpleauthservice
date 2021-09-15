@@ -8,22 +8,21 @@ const User = require("../models/user");
 const RefreshToken = require("../models/refreshToken");
 const crypto = require("crypto");
 const { configs } = require("../configs");
-const { sendEmail, renderTemplate } = require("../utils/sendEmail");
+const {
+	sendEmail,
+	renderTemplate,
+	confirmationEmailHelper,
+	passwordChangedEmailAlert,
+	sendNewLoginEmail,
+} = require("../utils/sendEmail");
 const {
 	sendErrorResponse,
 	sendSuccessResponse,
 	redirectWithToken,
 } = require("./responseHelpers");
 const {
-	confirmEmailTemplate,
-} = require("../utils/emailTemplates/confirmEmail");
-const {
-	passwordChangedTemplate,
-} = require("../utils/emailTemplates/passwordChanged");
-const {
 	resetPasswordTemplate,
 } = require("../utils/emailTemplates/resetPassword");
-const { newLoginTemplate } = require("../utils/emailTemplates/newLoginEmail");
 
 // @route	POST /api/v1/auth/signup
 // @desc	handler for registering user to database, returns
@@ -31,6 +30,7 @@ const { newLoginTemplate } = require("../utils/emailTemplates/newLoginEmail");
 // @access	Public
 const registerUser = async (request, reply) => {
 	let { name, email, password } = request.body;
+	let provider = "email";
 	password = await hashPasswd(password);
 	let role = "user";
 
@@ -47,10 +47,11 @@ const registerUser = async (request, reply) => {
 		email,
 		password,
 		role,
+		provider,
 	});
 
 	const confirmationToken = user.getEmailConfirmationToken();
-	user.save({ validateBeforeSave: false });
+	user.save({ validateBeforeSave: true });
 
 	const refreshToken = await getRefreshToken(user, request.ip);
 
@@ -84,22 +85,7 @@ const signin = async (request, reply) => {
 		if (await user.matchPasswd(password)) {
 			const refreshToken = await getRefreshToken(user, request.ip);
 
-			if (configs.SEND_NEW_LOGIN_EMAIL) {
-				await sendEmail({
-					email: user.email,
-					subject: `Important : New Login to your ${configs.APP_NAME} account`,
-					html: renderTemplate(
-						{
-							username: user.name,
-							appName: configs.APP_NAME,
-							appDomain: configs.APP_DOMAIN,
-							ip: request.ip,
-							ua: request.headers["user-agent"],
-						},
-						newLoginTemplate
-					),
-				});
-			}
+			await sendNewLoginEmail(user, request);
 
 			sendSuccessResponse(reply, {
 				statusCode: 200,
@@ -380,41 +366,6 @@ const revokeAllRefreshTokens = async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Successfully revoked all tokens",
-	});
-};
-
-const confirmationEmailHelper = async (user, request, confirmationToken) => {
-	const confirmationUrl = `${request.protocol}://${request.hostname}/api/v1/auth/confirmEmail?token=${confirmationToken}`;
-
-	return await sendEmail({
-		email: user.email,
-		subject: "Email confirmation token",
-		html: renderTemplate(
-			{
-				username: user.name,
-				buttonHREF: confirmationUrl,
-				appName: configs.APP_NAME,
-				appDomain: configs.APP_DOMAIN,
-			},
-			confirmEmailTemplate
-		),
-	});
-};
-
-const passwordChangedEmailAlert = async (user, request) => {
-	return await sendEmail({
-		email: user.email,
-		subject: "Security Alert",
-		html: renderTemplate(
-			{
-				username: user.name,
-				appName: configs.APP_NAME,
-				appDomain: configs.appDomain,
-				ip: request.ip,
-				ua: request.headers["user-agent"],
-			},
-			passwordChangedTemplate
-		),
 	});
 };
 

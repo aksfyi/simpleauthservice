@@ -17,9 +17,12 @@ const userSchema = new mongoose.Schema({
 			"Please submit a valid email",
 		],
 	},
+	provider: {
+		type: String,
+		enum: ["email", "github"],
+	},
 	password: {
 		type: String,
-		required: [true, "Please submit a password"],
 		minlength: 8,
 		select: false, // this will not be added to db
 	},

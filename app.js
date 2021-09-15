@@ -3,6 +3,7 @@ const { configs } = require("./configs");
 const { connectDB } = require("./models/connectDB");
 const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
+const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
 
 // Connect to MongoDB Database
@@ -23,8 +24,11 @@ if (configs.ALLOW_CORS_ORIGIN) {
 // Set error Handler
 fastify.setErrorHandler(getErrorHandler(fastify));
 
-//	Register Routes required for authentication
+// Register Routes required for authentication
 fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
+
+// Register oauth2 routes
+fastify.register(oauth2Routes, { prefix: "api/v1/oauth" });
 
 // Start the server
 const start = async () => {
