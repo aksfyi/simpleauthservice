@@ -1,5 +1,20 @@
 ﻿# Simpleauth
 Simple authentication service written using fastify + mongodb(mongoose)
+
+## Table of contents
+- [Simpleauth](#simpleauth)
+  - [Table of contents](#table-of-contents)
+  - [Features](#features)
+    - [Login with Oauth2 Providers](#login-with-oauth2-providers)
+  - [Setting up Locally](#setting-up-locally)
+    - [Configuring Environment variables](#configuring-environment-variables)
+    - [SMTP Configuration](#smtp-configuration)
+    - [Oauth2 Provider Configurations](#oauth2-provider-configurations)
+    - [Oauth2 Provider environment variables example](#oauth2-provider-environment-variables-example)
+    - [Application configurations](#application-configurations)
+  - [Swagger UI documentation](#swagger-ui-documentation)
+  - [Dependencies](#dependencies)
+
 ## Features
  - [x] Sign up and Login 
  - [x] Email verification
@@ -7,6 +22,8 @@ Simple authentication service written using fastify + mongodb(mongoose)
  - [x] Refresh Token Support
  - [x] Swagger UI for development environment
 
+### Login with Oauth2 Providers
+- [x] Github
 ## Setting up Locally
 
  - Clone the repository
@@ -36,6 +53,23 @@ Configurations required to send email
 | FROM_NAME | 
 | FROM_EMAIL | 
 
+### Oauth2 Provider Configurations
+
+- Required for oauth provider routes to work
+
+|Environment Variable| | Default |
+|--|--|--|
+|AUTH_SERVICE_HOST | Host address of the authentication service | http://localhost:{PORT} |
+
+### Oauth2 Provider environment variables example
+|Environment variable  | |
+|--|--|
+| GITHUB_CLIENT_ID | |
+| GITHUB_CLIENT_SECRET | | 
+| GITHUB_FRONTEND_REDIRECT | Frontend URL to which the server redirects with `token` or error message|
+
+
+
 
 ### Application configurations
 |  Environment Variable|  |
@@ -60,6 +94,8 @@ To access API documentation go to `http://localhost:{PORT}/documentation`
 | fastify| Fast and low overhead web framework, for Node.js |
 |fastify-cors|Add cors support|
 |fastify-swagger|Swagger UI|
+|fastify-oauth2|Adding support to login using oauth2 providers|
+|axios|Sending requests to oauth resource servers|
 |jsonwebtoken|Generate and verify JSON web tokens|
 |mongoose|MongoDB ORM|
 |mustache|Process HTML templates for emails|

@@ -28,7 +28,7 @@ fastify.setErrorHandler(getErrorHandler(fastify));
 fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
 
 // Register oauth2 routes
-fastify.register(oauth2Routes, { prefix: "api/v1/oauth" });
+fastify.register(oauth2Routes, { prefix: "api/v1/auth/oauth" });
 
 // Start the server
 const start = async () => {
