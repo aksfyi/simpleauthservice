@@ -34,7 +34,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 |--|--|--|
 |  MONGO_URI | MongoDB URI |-|
 | ENVIRONMENT | Product environment |"dev"|
-|  CHECK_ADMIN| Checks if admin user exists when signing up |0 (1 to check)|
+|  CHECK_ADMIN| Checks if admin user exists when signing up |1 (0 to skip check)|
 | JWT_KEY |Key used to sign JWT  |-|
 | PORT |Application Port  |5000|
 | ALLOW_CORS_ORIGIN | Origin for Cors |Disables CORS if its not configured|

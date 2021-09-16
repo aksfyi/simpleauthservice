@@ -117,4 +117,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
+# Files used for development
 notes.txt
+oauthLogin.html
