@@ -6,27 +6,7 @@ const {
 	sendNewLoginEmail,
 	confirmationEmailHelper,
 } = require("../utils/sendEmail");
-const {
-	sendErrorResponse,
-	sendSuccessResponse,
-	redirectWithToken,
-} = require("./responseHelpers");
-
-// GET  /api/v1/auth/oauth/callback/github
-// Route called by github after authenticating the user
-const githubCallback = (fastify) => async (request, reply) => {
-	const { error } = request.query;
-	if (error) {
-		sendErrorResponse(reply, 400, error, configs.GITHUB_FRONTEND_REDIRECT);
-	}
-	const token =
-		await fastify.githubOauth2.getAccessTokenFromAuthorizationCodeFlow(request);
-	redirectWithToken(
-		reply,
-		token.access_token,
-		configs.GITHUB_FRONTEND_REDIRECT
-	);
-};
+const { sendErrorResponse, sendSuccessResponse } = require("./responseHelpers");
 
 // POST /api/v1/auth/oauth/github/signin
 // Route which accepts github access token and performs
@@ -135,6 +115,5 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 };
 
 module.exports = {
-	githubCallback,
 	githubLogin,
 };

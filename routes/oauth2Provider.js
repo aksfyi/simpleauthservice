@@ -4,37 +4,6 @@ const { githubLogin, githubCallback } = require("../handlers/oauth2Provider");
 const { oauthSchema } = require("./schemas/oauth2ProviderSchema");
 
 const oauth2Routes = (fastify, _, done) => {
-	if (configs.GITHUB_CONFIGURED) {
-		fastify.register(oauthPlugin, {
-			name: "githubOauth2",
-			scope: "user:email",
-			credentials: {
-				client: {
-					id: configs.GITHUB_CLIENT_ID,
-					secret: configs.GITHUB_CLIENT_SECRET,
-				},
-				auth: oauthPlugin.GITHUB_CONFIGURATION,
-			},
-			schema: oauthSchema.common,
-			startRedirectPath: "/github",
-			callbackUri: `${configs.AUTH_SERVICE_HOST}/api/v1/auth/oauth/callback/github`,
-		});
-
-		fastify.route({
-			method: "GET",
-			url: "/callback/github",
-			handler: githubCallback(fastify),
-			schema: oauthSchema.frontendRedirection,
-		});
-
-		fastify.route({
-			method: "POST",
-			schema: oauthSchema.signin,
-			url: "/github/signin",
-			handler: githubLogin,
-		});
-	}
-
 	done();
 };
 
