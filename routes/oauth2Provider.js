@@ -7,7 +7,6 @@ const oauth2Routes = (fastify, _, done) => {
 	if (configs.GITHUB_CONFIGURED) {
 		fastify.register(oauthPlugin, {
 			name: "githubOauth2",
-			// Should be enabled under github app settings
 			scope: "user:email",
 			credentials: {
 				client: {
@@ -18,7 +17,7 @@ const oauth2Routes = (fastify, _, done) => {
 			},
 			schema: oauthSchema.common,
 			startRedirectPath: "/github",
-			callbackUri: `${configs.AUTH_SERVICE_HOST}/api/v1/oauth/callback/github`,
+			callbackUri: `${configs.AUTH_SERVICE_HOST}/api/v1/auth/oauth/callback/github`,
 		});
 
 		fastify.route({

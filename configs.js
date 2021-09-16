@@ -28,16 +28,23 @@ const configs = {
 	GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
 	GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
 	GITHUB_FRONTEND_REDIRECT: process.env.GITHUB_FRONTEND_REDIRECT,
-	GITHUB_CONFIGURED: false,
-};
+	GITHUB_CONFIGURED:
+		process.env.GITHUB_CLIENT_ID &&
+		process.env.GITHUB_CLIENT_SECRET &&
+		process.env.GITHUB_FRONTEND_REDIRECT
+			? true
+			: false,
 
-if (
-	configs.GITHUB_CLIENT_ID &&
-	configs.GITHUB_CLIENT_SECRET &&
-	configs.GITHUB_FRONTEND_REDIRECT
-) {
-	configs.GITHUB_CONFIGURED = true;
-}
+	GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+	GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+	GOOGLE_FRONTEND_REDIRECT: process.env.GOOGLE_FRONTEND_REDIRECT,
+	GOOGLE_CONFIGURED:
+		process.env.GOOGLE_CLIENT_ID &&
+		process.env.GOOGLE_CLIENT_SECRET &&
+		process.env.GOOGLE_FRONTEND_REDIRECT
+			? true
+			: false,
+};
 
 if (
 	configs.SMTP_HOST &&

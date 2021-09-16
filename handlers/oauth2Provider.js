@@ -69,7 +69,7 @@ const githubLogin = async (request, reply) => {
 			name,
 			email,
 			provider,
-			verified: false,
+			verified,
 			role,
 		});
 	}
