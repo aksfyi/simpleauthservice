@@ -5,9 +5,11 @@ Simple authentication service written using fastify + mongodb(mongoose)
 - [Simpleauth](#simpleauth)
   - [Table of contents](#table-of-contents)
   - [Features](#features)
+    - [Login with Oauth2 Providers](#login-with-oauth2-providers)
   - [Setting up Locally](#setting-up-locally)
     - [Configuring Environment variables](#configuring-environment-variables)
     - [SMTP Configuration](#smtp-configuration)
+    - [Oauth2 Provider Configurations](#oauth2-provider-configurations)
     - [Application configurations](#application-configurations)
   - [Swagger UI documentation](#swagger-ui-documentation)
   - [Dependencies](#dependencies)
@@ -19,8 +21,8 @@ Simple authentication service written using fastify + mongodb(mongoose)
  - [x] Refresh Token Support
  - [x] Swagger UI for development environment
 
-<!-- ### Login with Oauth2 Providers
-- [x] Github -->
+### Login with Oauth2 Providers
+- [x] Github
 ## Setting up Locally
 
  - Clone the repository
@@ -50,21 +52,14 @@ Configurations required to send email
 | FROM_NAME | 
 | FROM_EMAIL | 
 
-<!-- ### Oauth2 Provider Configurations
+### Oauth2 Provider Configurations
 
-- Required for oauth provider routes to work
-
-|Environment Variable| | Default |
-|--|--|--|
-|AUTH_SERVICE_HOST | Host address of the authentication service | http://localhost:{PORT} |
-
-### Oauth2 Provider environment variables example
 |Environment variable  | |
 |--|--|
-| GITHUB_CLIENT_ID | |
-| GITHUB_CLIENT_SECRET | | 
-| GITHUB_FRONTEND_REDIRECT | Frontend URL to which the server redirects with `token` or error message|
- -->
+| [PROVIDER]_CLIENT_ID | |
+| [PROVIDER]_CLIENT_SECRET | | 
+| [PROVIDER]_REDIRECT_URI | Frontend URL to which the provider redirects with `code` or error message|
+
 
 
 

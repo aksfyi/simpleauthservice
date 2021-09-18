@@ -2,14 +2,25 @@ const { configs } = require("../../configs");
 const { getSuccessObject, responseErrors } = require("./common");
 
 const oauthSchema = {
-	common: {
-		description:
-			"URL to handle sign in using oauth2 provider.\
-            Redirects to the provider url with the required\
-            query parameters",
+	getOauthProviderLogin: {
+		description: "URL to get provider login url",
 		tags: ["Oauth Provider Login"],
+		querystring: {
+			type: "object",
+			properties: {
+				state: { type: "string" },
+			},
+		},
+		response: {
+			200: getSuccessObject(200, true, "Successful Sign in", {
+				loginUrl: { type: "string" },
+			}),
+
+			400: responseErrors[400],
+			500: responseErrors[500],
+		},
 	},
-	signin: {
+	postOauthProviderLogin: {
 		description:
 			"Sign in using Oauth2 provider (callback URL handlers\
             redirection to frontend)",
@@ -17,12 +28,12 @@ const oauthSchema = {
 		body: {
 			type: "object",
 			properties: {
-				token: {
+				code: {
 					type: "string",
 					example: "asdfihasikdfjhisfuhkjdfn",
 				},
 			},
-			required: ["token"],
+			required: ["code"],
 		},
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
@@ -36,19 +47,6 @@ const oauthSchema = {
 			400: responseErrors[400],
 			500: responseErrors[500],
 			404: responseErrors[404],
-		},
-	},
-	frontendRedirection: {
-		description: "Redirects to frontend from Oauth2 provider callback URL",
-		tags: ["Oauth Provider Login"],
-		response: {
-			302: {
-				type: "object",
-				description: `Redirects to OAUTH_PROVIDER frontend url (Given in configuration)\
-                 .Success response will have success:true\
-				and token value added as query parameters.\
-				Failure value will have success:false error & message`,
-			},
 		},
 	},
 };

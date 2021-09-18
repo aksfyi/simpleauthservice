@@ -25,25 +25,24 @@ const configs = {
 	APP_CONFIRM_EMAIL_REDIRECT: process.env.APP_CONFIRM_EMAIL_REDIRECT,
 	APP_RESET_PASSWORD_REDIRECT: process.env.APP_RESET_PASSWORD_REDIRECT,
 
-	GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
-	GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
-	GITHUB_FRONTEND_REDIRECT: process.env.GITHUB_FRONTEND_REDIRECT,
-	GITHUB_CONFIGURED:
-		process.env.GITHUB_CLIENT_ID &&
-		process.env.GITHUB_CLIENT_SECRET &&
-		process.env.GITHUB_FRONTEND_REDIRECT
-			? true
-			: false,
+	// Internal Oauth2 provider configs
+	PROVIDER_GITHUB: "github",
+	SUPPORTED_PROVIDERS: ["github"],
 
-	GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-	GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
-	GOOGLE_FRONTEND_REDIRECT: process.env.GOOGLE_FRONTEND_REDIRECT,
-	GOOGLE_CONFIGURED:
-		process.env.GOOGLE_CLIENT_ID &&
-		process.env.GOOGLE_CLIENT_SECRET &&
-		process.env.GOOGLE_FRONTEND_REDIRECT
-			? true
-			: false,
+	GITHUB_CONFIGS: {
+		ACCESS_TOKEN: "https://github.com/login/oauth/access_token",
+		AUTHORIZE: "https://github.com/login/oauth/authorize",
+		SCOPE: "user:email",
+		CLIENT_ID: process.env.GITHUB_CLIENT_ID,
+		CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
+		REDIRECT_URI: process.env.GITHUB_REDIRECT_URI,
+		CONFIGURED:
+			process.env.GITHUB_CLIENT_ID &&
+			process.env.GITHUB_CLIENT_SECRET &&
+			process.env.GITHUB_REDIRECT_URI
+				? true
+				: false,
+	},
 };
 
 if (

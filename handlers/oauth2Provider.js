@@ -6,32 +6,49 @@ const {
 	sendNewLoginEmail,
 	confirmationEmailHelper,
 } = require("../utils/sendEmail");
+const { OauthProviderLogin } = require("../utils/services/oauthProviderLogin");
 const { sendErrorResponse, sendSuccessResponse } = require("./responseHelpers");
+const crypto = require("crypto");
+const user = require("../models/user");
 
-// POST /api/v1/auth/oauth/github/signin
-// Route which accepts github access token and performs
-// user sign in or sign up
-const githubLogin = async (request, reply) => {
-	const { token } = request.body;
-	const provider = "github";
-
-	const profileResponse = await axios.get("https://api.github.com/user", {
-		headers: {
-			Authorization: `token ${token}`,
-		},
+// @route 	GET /api/v1/auth/oauth/:provider
+// @desc	Route which accepts state and returns
+//			oauth provider login uri
+const getOauthProviderLogin = async (request, reply) => {
+	let state = request.query.state;
+	const provider = request.provider;
+	if (!state) {
+		state = crypto.randomBytes(10).toString("hex");
+	}
+	const oauthHandler = new OauthProviderLogin(provider);
+	const loginUrl = oauthHandler.getRedirectUrl(state);
+	if (!loginUrl) {
+		sendErrorResponse(reply, 400, "Invalid Login Provider");
+	}
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: "Successful",
+		loginUrl,
 	});
-	const emailResponse = await axios.get("https://api.github.com/user/emails", {
-		headers: {
-			Authorization: `token ${token}`,
-		},
-	});
+};
 
-	const { name } = profileResponse.data;
-	const emailList = emailResponse.data;
-	let email, verified, role;
-	let i = 0;
-
-	// Set Role to admin if no users exist
+// @route 	POST /api/v1/auth/oauth/:provider
+// @desc	Route which accepts code and returns
+//			jwt and refresh token if the code is valid
+const postOauthProviderLogin = async (request, reply) => {
+	const provider = request.provider;
+	const { code } = request.body;
+	const oauthHandler = new OauthProviderLogin(provider);
+	const userDetails = await oauthHandler.getUserDetails(code);
+	let role;
+	if (!userDetails || userDetails.error) {
+		sendErrorResponse(
+			reply,
+			userDetails.error ? 400 : 404,
+			userDetails.error ||
+				"Could not get the required details from Oauth provider."
+		);
+	}
 	if (configs.CHECK_ADMIN) {
 		const count = await User.countDocuments();
 		if (!count) {
@@ -39,21 +56,10 @@ const githubLogin = async (request, reply) => {
 		}
 	}
 
-	for (i = 0; i < emailList.length; i++) {
-		if (emailList[i]["primary"]) break;
-	}
-	if (emailList[i]["primary"] && emailList[i]["email"]) {
-		email = emailList[i]["email"];
-		verified = emailList[i]["verified"];
-		await oauthLoginHelper(request, reply, {
-			name,
-			email,
-			provider,
-			verified,
-			role,
-		});
-	}
-	sendErrorResponse(reply, 400, "Primary email not found in github");
+	await oauthLoginHelper(request, reply, {
+		...userDetails,
+		role,
+	});
 };
 
 /**
@@ -115,5 +121,6 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 };
 
 module.exports = {
-	githubLogin,
+	getOauthProviderLogin,
+	postOauthProviderLogin,
 };
