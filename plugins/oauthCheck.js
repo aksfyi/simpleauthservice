@@ -18,7 +18,7 @@ const oauthCheck = (request, reply, done) => {
 			sendErrorResponse(
 				reply,
 				404,
-				`ROUTE ${request.method}:${request.url} not found`
+				`Route ${request.method}:${request.url} not found`
 			);
 			break;
 	}

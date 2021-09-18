@@ -5,6 +5,15 @@ const oauthSchema = {
 	getOauthProviderLogin: {
 		description: "URL to get provider login url",
 		tags: ["Oauth Provider Login"],
+		params: {
+			type: "object",
+			properties: {
+				provider: {
+					type: "string",
+					description: "Oauth Provider",
+				},
+			},
+		},
 		querystring: {
 			type: "object",
 			properties: {
@@ -25,6 +34,15 @@ const oauthSchema = {
 			"Sign in using Oauth2 provider (callback URL handlers\
             redirection to frontend)",
 		tags: ["Oauth Provider Login"],
+		params: {
+			type: "object",
+			properties: {
+				provider: {
+					type: "string",
+					description: "Oauth Provider",
+				},
+			},
+		},
 		body: {
 			type: "object",
 			properties: {
