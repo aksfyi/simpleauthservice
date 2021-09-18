@@ -25,6 +25,14 @@ const configs = {
 	APP_CONFIRM_EMAIL_REDIRECT: process.env.APP_CONFIRM_EMAIL_REDIRECT,
 	APP_RESET_PASSWORD_REDIRECT: process.env.APP_RESET_PASSWORD_REDIRECT,
 
+	APP_DETAILS_CONFIGURED:
+		process.env.APP_NAME &&
+		process.env.APP_DOMAIN &&
+		process.env.APP_CONFIRM_EMAIL_REDIRECT &&
+		process.env.APP_RESET_PASSWORD_REDIRECT
+			? true
+			: false,
+
 	// Internal Oauth2 provider configs
 	PROVIDER_GITHUB: "github",
 	SUPPORTED_PROVIDERS: ["github"],
@@ -56,6 +64,17 @@ if (
 	configs.IS_SMTP_CONFIGURED = true;
 }
 
+// To send in root Route
+checkConfigs = {
+	isSMTPconfigured: configs.IS_SMTP_CONFIGURED,
+	isOauthProviderConfigured: {
+		github: configs.GITHUB_CONFIGS.CONFIGURED,
+	},
+	isAppDetailsConfigured: configs.APP_DETAILS_CONFIGURED,
+	environment: configs.ENVIRONMENT,
+};
+
 module.exports = {
 	configs,
+	checkConfigs,
 };

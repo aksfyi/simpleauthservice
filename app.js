@@ -1,5 +1,6 @@
 const fastify = require("fastify")({ logger: true });
-const { configs } = require("./configs");
+const { configs, checkConfigs } = require("./configs");
+const { sendSuccessResponse } = require("./handlers/responseHelpers");
 const { connectDB } = require("./models/connectDB");
 const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
@@ -29,6 +30,15 @@ fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
 
 // Register oauth2 routes
 fastify.register(oauth2Routes, { prefix: "api/v1/auth/oauth" });
+
+// Auth Service health check
+fastify.get("/", async (request, reply) => {
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: "Application is running",
+		...checkConfigs,
+	});
+});
 
 // Start the server
 const start = async () => {
