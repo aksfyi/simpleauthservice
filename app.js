@@ -7,9 +7,6 @@ const { authenticationRoutes } = require("./routes/authentication");
 const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
 
-// Connect to MongoDB Database
-connectDB(fastify);
-
 // Enable swagger ui in development environment
 if (configs.ENVIRONMENT.toLowerCase() === "dev") {
 	fastify.register(require("fastify-swagger"), getSwaggerOptions());
@@ -43,9 +40,15 @@ fastify.get("/", async (request, reply) => {
 // Start the server
 const start = async () => {
 	try {
-		await fastify.listen(configs.PORT);
-		if (configs.ENVIRONMENT.toLowerCase() === "dev") {
-			fastify.swagger();
+		if (configs.JWT_KEY && configs.MONGO_URI) {
+			// Connect to MongoDB Database
+			connectDB(fastify);
+			await fastify.listen(configs.PORT);
+			if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+				fastify.swagger();
+			}
+		} else {
+			fastify.log.error("Please configure the required environment variables");
 		}
 	} catch (err) {
 		fastify.log.error(err);

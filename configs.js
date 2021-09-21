@@ -72,6 +72,7 @@ checkConfigs = {
 	},
 	isAppDetailsConfigured: configs.APP_DETAILS_CONFIGURED,
 	environment: configs.ENVIRONMENT,
+	isCORSEnabled: configs.ALLOW_CORS_ORIGIN ? true : false,
 };
 
 module.exports = {

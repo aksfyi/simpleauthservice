@@ -11,7 +11,7 @@
     "type": "git",
     "url": "git+ssh://git@gitlab.com/identity9aks/simpleauth.git"
   },
-  "author": "9akst9",
+  "author": "Akshay",
   "license": "MIT",
   "bugs": {
     "url": "https://gitlab.com/identity9aks/simpleauth/issues"
