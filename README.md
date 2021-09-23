@@ -23,6 +23,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 
 ### Login with Oauth2 Providers
 - [x] Github
+- [x] Google
 ## Setting up Locally
 
  - Clone the repository
