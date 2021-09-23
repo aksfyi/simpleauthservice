@@ -4,15 +4,22 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
 const oauthCheck = (request, reply, done) => {
 	const { provider } = request.params;
 
+	// Function to send the error message if the oauth provider is
+	// not configured in the server
+	const sendOauthProviderError = () => {
+		sendErrorResponse(
+			reply,
+			500,
+			`Please configure ${provider} configs in server`
+		);
+	};
+
 	switch (provider) {
 		case configs.PROVIDER_GITHUB:
-			if (!configs.GITHUB_CONFIGS.CONFIGURED) {
-				sendErrorResponse(
-					reply,
-					500,
-					"Please configure github configs in server"
-				);
-			}
+			if (!configs.GITHUB_CONFIGS.CONFIGURED) sendOauthProviderError();
+			break;
+		case configs.PROVIDER_GOOGLE:
+			if (!configs.GOOGLE_CONFIGS.CONFIGURED) sendOauthProviderError();
 			break;
 		default:
 			sendErrorResponse(

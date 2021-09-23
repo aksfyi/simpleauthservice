@@ -35,7 +35,8 @@ const configs = {
 
 	// Internal Oauth2 provider configs
 	PROVIDER_GITHUB: "github",
-	SUPPORTED_PROVIDERS: ["github"],
+	PROVIDER_GOOGLE: "google",
+	SUPPORTED_PROVIDERS: ["github", "google"],
 
 	GITHUB_CONFIGS: {
 		ACCESS_TOKEN: "https://github.com/login/oauth/access_token",
@@ -48,6 +49,20 @@ const configs = {
 			process.env.GITHUB_CLIENT_ID &&
 			process.env.GITHUB_CLIENT_SECRET &&
 			process.env.GITHUB_REDIRECT_URI
+				? true
+				: false,
+	},
+	GOOGLE_CONFIGS: {
+		ACCESS_TOKEN: "https://www.googleapis.com/oauth2/v4/token",
+		AUTHORIZE: "https://accounts.google.com/o/oauth2/v2/auth",
+		SCOPE: "profile email",
+		CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+		CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+		REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI,
+		CONFIGURED:
+			process.env.GOOGLE_CLIENT_ID &&
+			process.env.GOOGLE_CLIENT_SECRET &&
+			process.env.GOOGLE_REDIRECT_URI
 				? true
 				: false,
 	},

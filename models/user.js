@@ -2,6 +2,7 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { configs } = require("../configs");
 
 const userSchema = new mongoose.Schema({
 	name: {
@@ -18,8 +19,11 @@ const userSchema = new mongoose.Schema({
 		],
 	},
 	provider: {
+		// Provider used during sign up
+		// This is not updated if the user uses a different
+		// oauth provider for sign in
 		type: String,
-		enum: ["email", "github"],
+		enum: ["email", ...configs.SUPPORTED_PROVIDERS],
 	},
 	password: {
 		type: String,
