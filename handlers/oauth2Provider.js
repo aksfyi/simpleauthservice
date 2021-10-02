@@ -27,6 +27,7 @@ const getOauthProviderLogin = async (request, reply) => {
 	}
 	sendSuccessResponse(reply, {
 		statusCode: 200,
+		state,
 		message: "Successful",
 		loginUrl,
 	});

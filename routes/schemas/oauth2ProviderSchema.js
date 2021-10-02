@@ -23,6 +23,7 @@ const oauthSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				loginUrl: { type: "string" },
+				state: { type: "string" },
 			}),
 
 			400: responseErrors[400],
