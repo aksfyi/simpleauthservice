@@ -9,8 +9,8 @@ const oauthCheck = (request, reply, done) => {
 	const sendOauthProviderError = () => {
 		sendErrorResponse(
 			reply,
-			500,
-			`Please configure ${provider} configs in server`
+			404,
+			`Please configure ${provider} configs in server.Provider configuration not found.`
 		);
 	};
 
