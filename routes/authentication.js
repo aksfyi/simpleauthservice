@@ -12,7 +12,7 @@ const {
 	revokeRefreshToken,
 	revokeAllRefreshTokens,
 	getProfile,
-} = require("../handlers/authentication");
+} = require("../handlers/authenticationHandler");
 const { verifyAuth } = require("../plugins/authVerify");
 const {
 	checkDeactivated,

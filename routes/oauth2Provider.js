@@ -1,7 +1,7 @@
 const {
 	getOauthProviderLogin,
 	postOauthProviderLogin,
-} = require("../handlers/oauth2provider");
+} = require("../handlers/oauth2ProviderHandler");
 const oauthCheck = require("../plugins/oauthCheck");
 const { oauthSchema } = require("./schemas/oauth2ProviderSchema");
 
