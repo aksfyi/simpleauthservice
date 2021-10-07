@@ -120,3 +120,5 @@ dist
 # Files used for development
 notes.txt
 oauthLogin.html
+#caprover deploy
+captain-definition
