@@ -3,7 +3,7 @@ require("dotenv").config();
 const configs = {
 	MONGO_URI: process.env.MONGO_URI,
 	ENVIRONMENT: process.env.ENVIRONMENT || "dev",
-	CHECK_ADMIN: process.env.CHECK_ADMIN || 1,
+	CHECK_ADMIN: process.env.CHECK_ADMIN === "0" ? false : true,
 	// Fastify will run on 127.0.0.1 if not set
 	// Set this to 0.0.0.0 when deploying using docker
 	// Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server
@@ -22,7 +22,7 @@ const configs = {
 	SMTP_PASSWORD: process.env.SMTP_PASSWORD,
 	FROM_NAME: process.env.FROM_NAME,
 	FROM_EMAIL: process.env.FROM_EMAIL,
-	DISABLE_MAIL: process.env.DISABLE_MAIL,
+	DISABLE_MAIL: process.env.DISABLE_MAIL === "1" ? true : false,
 
 	IS_SMTP_CONFIGURED: false,
 	APP_NAME: process.env.APP_NAME || "",
