@@ -113,7 +113,7 @@ userSchema.methods.isPwResetTokenExpired = function () {
 	if (!this.pwResetExpire) {
 		return true;
 	}
-	return Date.now >= this.pwResetExpire;
+	return Date.now() >= this.pwResetExpire;
 };
 
 userSchema.methods.getEmailConfirmationToken = function () {
@@ -135,7 +135,7 @@ userSchema.methods.isConfirmEmailTokenExpired = function () {
 	if (!this.confirmEmailTokenExpire) {
 		return true;
 	}
-	return Date.now >= this.confirmEmailTokenExpire;
+	return Date.now() >= this.confirmEmailTokenExpire;
 };
 
 module.exports = mongoose.model("User", userSchema);

@@ -15,6 +15,7 @@ const configs = {
 		`http://localhost:${process.env.PORT || 5000}`,
 	ALLOW_CORS_ORIGIN: process.env.ALLOW_CORS_ORIGIN,
 	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL,
+	HTTP_PROTOCOL: process.env.HTTP_PROTOCOL,
 
 	SMTP_HOST: process.env.SMTP_HOST,
 	SMTP_PORT: process.env.SMTP_PORT,
@@ -82,6 +83,13 @@ if (
 	configs.FROM_NAME
 ) {
 	configs.IS_SMTP_CONFIGURED = true;
+}
+
+if (configs.HTTP_PROTOCOL) {
+	configs.HTTP_PROTOCOL = configs.HTTP_PROTOCOL.toLowerCase();
+	if (!["http", "https"].includes(configs.HTTP_PROTOCOL)) {
+		configs.HTTP_PROTOCOL = false;
+	}
 }
 
 // To send in root Route

@@ -4,6 +4,7 @@ const mustache = require("mustache");
 const { newLoginTemplate } = require("./emailTemplates/newLoginEmail");
 const { passwordChangedTemplate } = require("./emailTemplates/passwordChanged");
 const { confirmEmailTemplate } = require("./emailTemplates/confirmEmail");
+const { resetPasswordTemplate } = require("./emailTemplates/resetPassword");
 
 const sendEmail = async (options) => {
 	if (configs.DISABLE_MAIL) {
@@ -40,7 +41,9 @@ const renderTemplate = (view, template) => {
 
 // Send Email confirmation mail to the user
 const confirmationEmailHelper = async (user, request, confirmationToken) => {
-	const confirmationUrl = `${request.protocol}://${request.hostname}/api/v1/auth/confirmEmail?token=${confirmationToken}`;
+	const confirmationUrl = `${configs.HTTP_PROTOCOL || request.protocol}://${
+		request.hostname
+	}/api/v1/auth/confirmEmail?token=${confirmationToken}`;
 
 	return await sendEmail({
 		email: user.email,
@@ -53,6 +56,27 @@ const confirmationEmailHelper = async (user, request, confirmationToken) => {
 				appDomain: configs.APP_DOMAIN,
 			},
 			confirmEmailTemplate
+		),
+	});
+};
+
+// Send Password Reset email to the user
+const passwordResetEmailHelper = async (user, request, pwResetToken) => {
+	const resetUrl = `${configs.HTTP_PROTOCOL || request.protocol}://${
+		request.hostname
+	}/api/v1/auth/resetPassword?token=${pwResetToken}`;
+
+	return await sendEmail({
+		email: user.email,
+		subject: "Reset Password Link",
+		html: renderTemplate(
+			{
+				username: user.name,
+				buttonHREF: resetUrl,
+				appName: configs.APP_NAME,
+				appDomain: configs.APP_DOMAIN,
+			},
+			resetPasswordTemplate
 		),
 	});
 };
@@ -99,6 +123,7 @@ module.exports = {
 	sendEmail,
 	renderTemplate,
 	confirmationEmailHelper,
+	passwordResetEmailHelper,
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
 };

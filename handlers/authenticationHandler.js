@@ -14,6 +14,7 @@ const {
 	confirmationEmailHelper,
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
+	passwordResetEmailHelper,
 } = require("../utils/sendEmail");
 const {
 	sendErrorResponse,
@@ -174,22 +175,9 @@ const requestResetPasswordToken = async (request, reply) => {
 		sendErrorResponse(reply, 400, "Please check your email, try again later");
 	} else {
 		const pwResetToken = user.getPwResetToken();
-		const resetUrl = `${request.protocol}://${request.hostname}/api/v1/auth/resetPassword?token=${pwResetToken}`;
 		await user.save({ validateBeforeSave: false });
 
-		emailMessage = await sendEmail({
-			email: user.email,
-			subject: "Reset Password Link",
-			html: renderTemplate(
-				{
-					username: user.name,
-					buttonHREF: resetUrl,
-					appName: configs.APP_NAME,
-					appDomain: configs.APP_DOMAIN,
-				},
-				resetPasswordTemplate
-			),
-		});
+		emailMessage = await passwordResetEmailHelper(user, request, pwResetToken);
 
 		reply.send({
 			statusCode: 200,
@@ -277,7 +265,6 @@ const updatePassword = async (request, reply) => {
 // @access	Private(requires JWT token in header)
 const getProfile = async (request, reply) => {
 	const user = request.user;
-	console.log(user);
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "User Found",

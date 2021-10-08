@@ -59,6 +59,9 @@ const checkMailingDisabled = async (request, reply) => {
 	if (configs.DISABLE_MAIL) {
 		sendErrorResponse(reply, 500, "Mailing is disabled in the server");
 	}
+	if (!configs.IS_SMTP_CONFIGURED) {
+		sendErrorResponse(reply, 500, "Mailing is not configured in the server");
+	}
 };
 
 const must = (reply, parameter, message) => {
