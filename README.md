@@ -42,6 +42,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | PORT |Application Port  |5000|
 | ALLOW_CORS_ORIGIN | Origin for Cors |Disables CORS if its not configured|
 |  SEND_NEW_LOGIN_EMAIL| Send email alert if the user is logged in |0 (1 to send)|
+| HOST | Fastify will run on 127.0.0.1 if HOST not set.Set this to 0.0.0.0 when deploying using docker.Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server | Fastify will run the application in localhost (127.0.0.1) by default |
 ### SMTP Configuration
 Configurations required to send email
 |Environment variable  |

@@ -43,7 +43,7 @@ const start = async () => {
 		if (configs.JWT_KEY && configs.MONGO_URI) {
 			// Connect to MongoDB Database
 			connectDB(fastify);
-			await fastify.listen(configs.PORT);
+			await fastify.listen(configs.PORT, configs.HOST);
 			if (configs.ENVIRONMENT.toLowerCase() === "dev") {
 				fastify.swagger();
 			}

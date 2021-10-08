@@ -4,6 +4,10 @@ const configs = {
 	MONGO_URI: process.env.MONGO_URI,
 	ENVIRONMENT: process.env.ENVIRONMENT || "dev",
 	CHECK_ADMIN: process.env.CHECK_ADMIN || 1,
+	// Fastify will run on 127.0.0.1 if not set
+	// Set this to 0.0.0.0 when deploying using docker
+	// Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server
+	HOST: process.env.HOST,
 	JWT_KEY: process.env.JWT_KEY,
 	PORT: process.env.PORT || 5000,
 	AUTH_SERVICE_HOST:
