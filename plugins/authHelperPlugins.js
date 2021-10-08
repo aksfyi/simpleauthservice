@@ -1,5 +1,6 @@
 const { sendErrorResponse } = require("../handlers/responseHelpers");
 const User = require("../models/user");
+const { configs } = require("../configs");
 
 /**
  * This should be used only after the JWT tokens are verified
@@ -54,6 +55,12 @@ const checkPasswordLength = async (request, reply) => {
 	}
 };
 
+const checkMailingDisabled = async (request, reply) => {
+	if (configs.DISABLE_MAIL) {
+		sendErrorResponse(reply, 500, "Mailing is disabled in the server");
+	}
+};
+
 const must = (reply, parameter, message) => {
 	if (!parameter) {
 		sendErrorResponse(reply, 400, message);
@@ -66,4 +73,5 @@ module.exports = {
 	attachUser,
 	attachUserWithPassword,
 	checkPasswordLength,
+	checkMailingDisabled,
 };

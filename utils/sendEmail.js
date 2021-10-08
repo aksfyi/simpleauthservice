@@ -6,6 +6,9 @@ const { passwordChangedTemplate } = require("./emailTemplates/passwordChanged");
 const { confirmEmailTemplate } = require("./emailTemplates/confirmEmail");
 
 const sendEmail = async (options) => {
+	if (configs.DISABLE_MAIL) {
+		return "Mailing is disabled";
+	}
 	if (configs.IS_SMTP_CONFIGURED) {
 		const transporter = nodemailer.createTransport({
 			host: configs.SMTP_HOST,

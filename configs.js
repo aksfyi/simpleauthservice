@@ -22,6 +22,7 @@ const configs = {
 	SMTP_PASSWORD: process.env.SMTP_PASSWORD,
 	FROM_NAME: process.env.FROM_NAME,
 	FROM_EMAIL: process.env.FROM_EMAIL,
+	DISABLE_MAIL: process.env.DISABLE_MAIL,
 
 	IS_SMTP_CONFIGURED: false,
 	APP_NAME: process.env.APP_NAME || "",

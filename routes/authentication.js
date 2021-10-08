@@ -20,6 +20,7 @@ const {
 	attachUser,
 	attachUserWithPassword,
 	checkPasswordLength,
+	checkMailingDisabled,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
@@ -56,6 +57,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		schema: authenticationSchema.confirmEmailPost,
 		preHandler: [
 			verifyAuth(["admin", "user"], false),
+			checkMailingDisabled,
 			checkDeactivated,
 			attachUser(false, false),
 		],
@@ -85,6 +87,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/resetPassword",
 		schema: authenticationSchema.resetPasswordPost,
+		preHandler: checkMailingDisabled,
 		handler: requestResetPasswordToken,
 	});
 
