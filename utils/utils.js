@@ -18,7 +18,7 @@ const getSwaggerOptions = () => {
 				},
 			},
 			//host: `localhost:${configs.PORT}`,
-			schemes: ["http"],
+			schemes: ["http", "https"],
 			consumes: ["application/json"],
 			produces: ["application/json"],
 		},
