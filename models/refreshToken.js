@@ -1,7 +1,4 @@
-const crypto = require("crypto");
 const mongoose = require("mongoose");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 
 const refreshTokenSchema = new mongoose.Schema({
 	token: String,
@@ -11,11 +8,10 @@ const refreshTokenSchema = new mongoose.Schema({
 	},
 	createdAt: {
 		type: Date,
-		default: Date.now(),
+		default: Date.now,
 	},
 	expiresAt: {
 		type: Date,
-		default: Date.now() + 30 * 24 * 60 * 60 * 1000, //expires in 30 days
 	},
 	createdBy: {
 		type: String,

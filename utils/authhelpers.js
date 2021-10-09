@@ -21,6 +21,7 @@ const getRefreshToken = async (user, requestIp) => {
 		token: hashedToken,
 		user,
 		createdBy: requestIp,
+		expiresAt: Date.now() + 30 * 24 * 60 * 60 * 1000,
 	});
 
 	rt.save();
@@ -29,7 +30,6 @@ const getRefreshToken = async (user, requestIp) => {
 };
 
 const revokeAllRfTokenByUser = async (user, revokedBy) => {
-	console.log("revoking all tokens");
 	await RefreshToken.updateMany(
 		{ user, isRevoked: false },
 		{ $set: { isRevoked: true, revokedBy: revokedBy, expiresAt: Date.now() } }

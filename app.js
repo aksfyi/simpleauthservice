@@ -1,6 +1,7 @@
 const fastify = require("fastify")({ logger: true });
 const { configs, checkConfigs } = require("./configs");
 const { sendSuccessResponse } = require("./handlers/responseHelpers");
+const jobsInit = require("./jobs/init");
 const { connectDB } = require("./models/connectDB");
 const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
@@ -47,6 +48,9 @@ const start = async () => {
 			if (configs.ENVIRONMENT.toLowerCase() === "dev") {
 				fastify.swagger();
 			}
+
+			// Start Cron Jobs
+			jobsInit(fastify);
 		} else {
 			fastify.log.error("Please configure the required environment variables");
 		}

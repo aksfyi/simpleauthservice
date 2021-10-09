@@ -3,7 +3,11 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
 
 const getErrorHandler = (fastify) => {
 	return function (err, request, reply) {
-		fastify.log.error(err);
+		if (configs.ENVIRONMENT === "dev") {
+			fastify.log.error(err);
+		} else {
+			fastify.log.error(err.message);
+		}
 
 		//Default Status code and error message
 		let statusCode = 500;
