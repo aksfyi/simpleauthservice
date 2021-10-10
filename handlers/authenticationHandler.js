@@ -324,6 +324,56 @@ const getJWTFromRefresh = async (request, reply) => {
 	);
 };
 
+// @route 	PUT /api/v1/auth/refresh/revoke
+// @desc	revokes the refresh token. Used when logging out
+// @access  Private(required JWT in authorization header)
+const revokeRefreshToken = async (request, reply) => {
+	const rft = await RefreshToken.findOne({
+		token: crypto
+			.createHash("sha256")
+			.update(request.refreshToken)
+			.digest("hex"),
+		isRevoked: false,
+	});
+
+	const sendInvalidToken = () => {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token", {
+			clearCookie: true,
+		});
+	};
+
+	if (!rft) {
+		sendInvalidToken();
+	}
+
+	const user = await User.findById(rft.user);
+
+	if (!user) {
+		sendInvalidToken();
+	}
+
+	if (user.email !== request.user.email) {
+		// Check whether the refresh token was created by the same user
+		sendInvalidToken();
+	}
+
+	if (rft.isExpired()) {
+		sendErrorResponse(reply, 400, "Refresh Token Expired", {
+			clearCookie: true,
+		});
+	}
+	rft.revoke(request.ip);
+	rft.save();
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 200,
+			message: "Refresh token successfully revoked",
+		},
+		{ clearCookie: true }
+	);
+};
+
 // @route 	PUT /api/v1/auth/revokeAll
 // @desc 	Route used to log out of all devices , i.e
 // 			revoke all refreshTokens
@@ -348,6 +398,7 @@ module.exports = {
 	updatePassword,
 	signin,
 	getJWTFromRefresh,
+	revokeRefreshToken,
 	revokeAllRefreshTokens,
 	getProfile,
 };

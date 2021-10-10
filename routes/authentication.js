@@ -21,6 +21,7 @@ const {
 	attachUserWithPassword,
 	checkPasswordLength,
 	checkMailingDisabled,
+	refreshTokenValidation,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
@@ -129,7 +130,20 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/refresh",
 		schema: authenticationSchema.refreshJWTToken,
+		preHandler: refreshTokenValidation,
 		handler: getJWTFromRefresh,
+	});
+
+	fastify.route({
+		method: "PUT",
+		url: "/refresh/revoke",
+		schema: authenticationSchema.revokeRefreshToken,
+		preHandler: [
+			verifyAuth(["admin", "user"], false),
+			checkDeactivated,
+			refreshTokenValidation,
+		],
+		handler: revokeRefreshToken,
 	});
 
 	// Route to revoke all refresh tokens

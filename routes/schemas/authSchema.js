@@ -195,12 +195,27 @@ const authenticationSchema = {
 		description:
 			"Get new JWT token from refresh token in the cookie. Sets new Refresh token in the cookie",
 		tags: ["Refresh Token"],
-		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
 				refreshToken: { type: "string" },
 			}),
+			400: errors[404],
+			500: errors[500],
+		},
+	},
+	revokeRefreshToken: {
+		description:
+			"Revoke Refresh Token Sent from cookie. Used when logging out users",
+		tags: ["Refresh Token"],
+		security: jwtSecurity,
+		response: {
+			200: getSuccessObject(
+				200,
+				true,
+				"Refresh Token Successfully Revoked",
+				{}
+			),
 			400: errors[404],
 			500: errors[500],
 		},

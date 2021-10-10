@@ -16,6 +16,9 @@ const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 			break;
 	}
 	if (!options.redirectURL) {
+		if (options.clearCookie) {
+			reply.clearCookie("refreshToken", getRefreshTokenOptns());
+		}
 		reply.status(statusCode).send({
 			statusCode,
 			error,
@@ -35,19 +38,19 @@ const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 const sendSuccessResponse = (reply, response, options = {}) => {
 	if (!options.redirectURL) {
 		if (options.refreshToken) {
-			reply
-				.code(response.statusCode)
-				.setCookie("refreshToken", options.refreshToken, getRefreshTokenOptns())
-				.send({
-					...response,
-					success: true,
-				});
-		} else {
-			reply.code(response.statusCode).send({
-				...response,
-				success: true,
-			});
+			reply.setCookie(
+				"refreshToken",
+				options.refreshToken,
+				getRefreshTokenOptns()
+			);
 		}
+		if (options.clearCookie) {
+			reply.clearCookie("refreshToken", getRefreshTokenOptns());
+		}
+		reply.code(response.statusCode).send({
+			...response,
+			success: true,
+		});
 	} else {
 		reply
 			.code(302)
