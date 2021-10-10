@@ -47,7 +47,9 @@ const confirmationEmailHelper = async (user, request, confirmationToken) => {
 
 	return await sendEmail({
 		email: user.email,
-		subject: "Email confirmation token",
+		subject: `Confirm your email address ${
+			configs.APP_NAME ? `to get started on ${configs.APP_NAME}` : ""
+		}`,
 		html: renderTemplate(
 			{
 				username: user.name,
@@ -68,7 +70,9 @@ const passwordResetEmailHelper = async (user, request, pwResetToken) => {
 
 	return await sendEmail({
 		email: user.email,
-		subject: "Reset Password Link",
+		subject: `Password Reset Request ${
+			configs.APP_NAME ? `for ${configs.APP_NAME}` : ""
+		} `,
 		html: renderTemplate(
 			{
 				username: user.name,
@@ -103,7 +107,9 @@ const sendNewLoginEmail = async (user, request) => {
 	if (configs.SEND_NEW_LOGIN_EMAIL) {
 		return await sendEmail({
 			email: user.email,
-			subject: `Important : New Login to your ${configs.APP_NAME} account`,
+			subject: `Important : New Login to your ${
+				configs.APP_NAME || ""
+			} account`,
 			html: renderTemplate(
 				{
 					username: user.name,
