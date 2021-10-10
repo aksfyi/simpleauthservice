@@ -57,11 +57,9 @@ const oauthSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
 			}),
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
 			}),
 			400: responseErrors[400],
 			500: responseErrors[500],

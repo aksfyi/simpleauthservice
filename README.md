@@ -36,7 +36,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 |Environment variable  |  |Default (If not configured)|
 |--|--|--|
 |  MONGO_URI | MongoDB URI |-|
-| ENVIRONMENT | Product environment |"dev"|
+| ENVIRONMENT | Product environment |`keywords.DEVELOPMENT_ENV` . Check `configs.js`|
 |  CHECK_ADMIN| Checks if admin user exists when signing up |1 (0 to skip check)|
 | JWT_KEY |Key used to sign JWT  |-|
 | PORT |Application Port  |5000|
@@ -90,6 +90,8 @@ To access API documentation go to `http://localhost:{PORT}/documentation`
 | fastify| Fast and low overhead web framework, for Node.js |
 |fastify-cors|Add cors support|
 |fastify-swagger|Swagger UI|
+|fastify-cookie | A plugin for Fastify that adds support for reading and setting cookies.|
+|fastify-helmet |Important security headers for Fastify. It is a tiny wrapper around helmet.|
 |axios|Sending requests to oauth resource servers|
 |jsonwebtoken|Generate and verify JSON web tokens|
 |mongoose|MongoDB ORM|

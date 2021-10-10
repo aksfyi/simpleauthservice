@@ -1,5 +1,5 @@
 const fastify = require("fastify")({ logger: true });
-const { configs, checkConfigs } = require("./configs");
+const { configs, checkConfigs, keywords } = require("./configs");
 const { sendSuccessResponse } = require("./handlers/responseHelpers");
 const jobsInit = require("./jobs/init");
 const { connectDB } = require("./models/connectDB");
@@ -7,9 +7,23 @@ const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
 const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
+const helmet = require("fastify-helmet");
+
+// fastify-helmet adds various HTTP headers for security
+if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+	fastify.register(helmet, { contentSecurityPolicy: false });
+}
+
+if (configs.COOKIE_SECRET) {
+	fastify.register(require("fastify-cookie"), {
+		secret: configs.COOKIE_SECRET, // For signing cookies
+		parseOptions: {},
+	});
+}
 
 // Enable swagger ui in development environment
-if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 	fastify.register(require("fastify-swagger"), getSwaggerOptions());
 }
 
@@ -41,11 +55,11 @@ fastify.get("/", async (request, reply) => {
 // Start the server
 const start = async () => {
 	try {
-		if (configs.JWT_KEY && configs.MONGO_URI) {
+		if (configs.JWT_KEY && configs.MONGO_URI && configs.COOKIE_SECRET) {
 			// Connect to MongoDB Database
 			connectDB(fastify);
 			await fastify.listen(configs.PORT, configs.HOST);
-			if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+			if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 				fastify.swagger();
 			}
 

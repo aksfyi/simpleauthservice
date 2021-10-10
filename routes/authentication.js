@@ -132,15 +132,6 @@ const authenticationRoutes = (fastify, _, done) => {
 		handler: getJWTFromRefresh,
 	});
 
-	// Route to revoke refresh token
-	fastify.route({
-		method: "PUT",
-		url: "/revoke",
-		schema: authenticationSchema.revokeRefreshToken,
-		preHandler: [verifyAuth(["admin", "user"], false), checkDeactivated],
-		handler: revokeRefreshToken,
-	});
-
 	// Route to revoke all refresh tokens
 	fastify.route({
 		method: "PUT",

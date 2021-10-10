@@ -9,7 +9,6 @@ const {
 const { OauthProviderLogin } = require("../utils/services/oauthProviderLogin");
 const { sendErrorResponse, sendSuccessResponse } = require("./responseHelpers");
 const crypto = require("crypto");
-const user = require("../models/user");
 
 // @route 	GET /api/v1/auth/oauth/:provider
 // @desc	Route which accepts state and returns
@@ -86,12 +85,15 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 
 		await sendNewLoginEmail(user, request);
 
-		sendSuccessResponse(reply, {
-			statusCode: 200,
-			message: "Signed in",
-			token: user.getJWT(),
-			refreshToken,
-		});
+		sendSuccessResponse(
+			reply,
+			{
+				statusCode: 200,
+				message: "Signed in",
+				token: user.getJWT(),
+			},
+			{ refreshToken }
+		);
 	} else {
 		user = await User.create({
 			name,
@@ -112,12 +114,15 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			);
 		}
 		const refreshToken = await getRefreshToken(user, request.ip);
-		sendSuccessResponse(reply, {
-			statusCode: 201,
-			message: "Sign up successful." + emailMessage,
-			token: user.getJWT(),
-			refreshToken,
-		});
+		sendSuccessResponse(
+			reply,
+			{
+				statusCode: 201,
+				message: "Sign up successful." + emailMessage,
+				token: user.getJWT(),
+			},
+			{ refreshToken }
+		);
 	}
 };
 

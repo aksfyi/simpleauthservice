@@ -3,14 +3,11 @@ const {
 	getRefreshToken,
 	revokeAllRfTokenByUser,
 } = require("../utils/authhelpers");
-
 const User = require("../models/user");
 const RefreshToken = require("../models/refreshToken");
 const crypto = require("crypto");
 const { configs } = require("../configs");
 const {
-	sendEmail,
-	renderTemplate,
 	confirmationEmailHelper,
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
@@ -21,9 +18,6 @@ const {
 	sendSuccessResponse,
 	redirectWithToken,
 } = require("./responseHelpers");
-const {
-	resetPasswordTemplate,
-} = require("../utils/emailTemplates/resetPassword");
 
 // @route	POST /api/v1/auth/signup
 // @desc	handler for registering user to database, returns
@@ -45,6 +39,7 @@ const registerUser = async (request, reply) => {
 
 	const user = await User.create({
 		name,
+		uid: crypto.randomBytes(15).toString("hex"),
 		email,
 		password,
 		role,
@@ -62,12 +57,17 @@ const registerUser = async (request, reply) => {
 		confirmationToken
 	);
 
-	sendSuccessResponse(reply, {
-		statusCode: 201,
-		message: "Sign up successful." + emailMessage,
-		token: user.getJWT(),
-		refreshToken,
-	});
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 201,
+			message: "Sign up successful." + emailMessage,
+			token: user.getJWT(),
+		},
+		{
+			refreshToken,
+		}
+	);
 };
 
 // @route 	 POST /api/v1/auth/signin
@@ -88,12 +88,17 @@ const signin = async (request, reply) => {
 
 			await sendNewLoginEmail(user, request);
 
-			sendSuccessResponse(reply, {
-				statusCode: 200,
-				message: "Signed in",
-				token: user.getJWT(),
-				refreshToken,
-			});
+			sendSuccessResponse(
+				reply,
+				{
+					statusCode: 200,
+					message: "Signed in",
+					token: user.getJWT(),
+				},
+				{
+					refreshToken,
+				}
+			);
 		} else {
 			sendErrorResponse(reply, 400, "Password Does not match");
 		}
@@ -104,11 +109,9 @@ const signin = async (request, reply) => {
 // @desc	Endpoint to confirm the email of the user
 // @access	Public (confirm email with the token . JWT is NOT required)
 const confirmEmailTokenRedirect = async (request, reply) => {
-	redirectWithToken(
-		reply,
-		request.query.token,
-		configs.APP_CONFIRM_EMAIL_REDIRECT
-	);
+	redirectWithToken(reply, request.query.token, {
+		redirectURL: configs.APP_CONFIRM_EMAIL_REDIRECT,
+	});
 };
 
 // @route 	PUT /api/v1/auth/confirmEmail
@@ -191,11 +194,9 @@ const requestResetPasswordToken = async (request, reply) => {
 //		  	verifies the token and redirects to frontend
 // @access 	Public
 const resetPasswordTokenRedirect = async (request, reply) => {
-	redirectWithToken(
-		reply,
-		request.query.token,
-		configs.APP_RESET_PASSWORD_REDIRECT
-	);
+	redirectWithToken(reply, request.query.token, {
+		redirectURL: configs.APP_RESET_PASSWORD_REDIRECT,
+	});
 };
 
 // @route 	PUT /api/v1/auth/resetPassword
@@ -247,6 +248,7 @@ const updatePassword = async (request, reply) => {
 			"Password and confirmed password are different"
 		);
 	}
+
 	await revokeAllRfTokenByUser(user, request.ip);
 
 	user.password = await hashPasswd(password);
@@ -260,7 +262,7 @@ const updatePassword = async (request, reply) => {
 	});
 };
 
-// @route 	PUT /api/v1/auth/profile
+// @route 	GET /api/v1/auth/profile
 // @desc 	Route used to get user Info
 // @access	Private(requires JWT token in header)
 const getProfile = async (request, reply) => {
@@ -272,14 +274,24 @@ const getProfile = async (request, reply) => {
 	});
 };
 
-// @route 	/api/v1/auth/refresh
+// @route 	POST /api/v1/auth/refresh
 // @desc 	Get new jwt token and refresh token from unused refresh token
 //		 	(refresh token should be used only once)
 // @access 	Private (JWT is not required but refresh token is required)
 const getJWTFromRefresh = async (request, reply) => {
-	const { refreshToken } = request.body;
+	// Fastify-cookie has a function which can be used to sign & unsign tokens
+	// unsignCookie returns valid, renew & false
+	// valid (boolean) : the cookie has been unsigned successfully
+	// renew (boolean) : the cookie has been unsigned with an old secret
+	// value (string/null) : if the cookie is valid then returns string else null
+	let refreshToken = request.unsignCookie(request.cookies.refreshToken);
+
+	if (!refreshToken.valid) {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+	}
+
 	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+		token: crypto.createHash("sha256").update(refreshToken.value).digest("hex"),
 		isRevoked: false,
 	});
 	if (!rft) {
@@ -299,48 +311,17 @@ const getJWTFromRefresh = async (request, reply) => {
 	rft.save();
 	const newRefreshToken = await getRefreshToken(user, request.ip);
 
-	sendSuccessResponse(reply, {
-		statusCode: 200,
-		message: "Refresh token : successful",
-		token: jwtToken,
-		refreshToken: newRefreshToken,
-	});
-};
-
-// @route 	PUT /api/v1/auth/revoke
-// @desc	revokes the refresh token
-// @access  Private(required JWT in authorization header)
-const revokeRefreshToken = async (request, reply) => {
-	const { refreshToken } = request.body;
-	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
-		isRevoked: false,
-	});
-
-	if (!rft) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
-	}
-
-	const user = await User.findById(rft.user);
-
-	if (!user) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
-	}
-
-	if (user.email !== request.user.email) {
-		// Check whether the refresh token was created by the same user
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
-	}
-
-	if (rft.isExpired()) {
-		sendErrorResponse(reply, 400, "Refresh Token Expired");
-	}
-	rft.revoke(request.ip);
-	rft.save();
-	sendSuccessResponse(reply, {
-		statusCode: 200,
-		message: "Refresh token successfully revoked",
-	});
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 200,
+			message: "Refresh token : successful",
+			token: jwtToken,
+		},
+		{
+			refreshToken: newRefreshToken,
+		}
+	);
 };
 
 // @route 	PUT /api/v1/auth/revokeAll
@@ -367,7 +348,6 @@ module.exports = {
 	updatePassword,
 	signin,
 	getJWTFromRefresh,
-	revokeRefreshToken,
 	revokeAllRefreshTokens,
 	getProfile,
 };

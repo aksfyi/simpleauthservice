@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema({
 		type: String,
 		required: [true, "Please submit the name"],
 	},
+	uid: {
+		type: String,
+		required: true,
+		unique: true,
+	},
 	email: {
 		type: String,
 		unique: true,
@@ -77,6 +82,7 @@ userSchema.methods.getJWT = function () {
 			role: this.role,
 			email: this.email,
 			name: this.name,
+			uid: this.uid,
 			isEmailConfirmed: this.isEmailConfirmed,
 			// isAccountVerified: this.isAccountVerified,
 			isDeactivated: this.isDeactivated,

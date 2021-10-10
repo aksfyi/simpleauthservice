@@ -5,7 +5,8 @@ const errors = responseErrors;
 
 const authenticationSchema = {
 	signup: {
-		description: "Sign up to the service",
+		description:
+			"Sign up to the service. Returns JWT token and sets Refresh token as cookie",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -23,14 +24,13 @@ const authenticationSchema = {
 		response: {
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
 			}),
 			400: errors[404],
 			500: errors[500],
 		},
 	},
 	signin: {
-		description: "Sign in to get JWT and Refresh Token",
+		description: "Sign in .Returns JWT token and sets Refresh token as cookie",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -47,7 +47,6 @@ const authenticationSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
 			}),
 			400: errors[400],
 			500: errors[500],
@@ -193,42 +192,15 @@ const authenticationSchema = {
 		},
 	},
 	refreshJWTToken: {
-		description: "Get new Refresh token",
+		description:
+			"Get new JWT token from refresh token in the cookie. Sets new Refresh token in the cookie",
 		tags: ["Refresh Token"],
-		body: {
-			type: "object",
-			properties: {
-				refreshToken: { type: "string" },
-			},
-			required: ["refreshToken"],
-		},
 		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
 				refreshToken: { type: "string" },
 			}),
-			400: errors[404],
-			500: errors[500],
-		},
-	},
-	revokeRefreshToken: {
-		description: "Revoke Refresh Token",
-		tags: ["Refresh Token"],
-		body: {
-			type: "object",
-			properties: {
-				refreshToken: { type: "string" },
-			},
-			required: ["refreshToken"],
-		},
-		response: {
-			200: getSuccessObject(
-				200,
-				true,
-				"Refresh Token Successfully Revoked",
-				{}
-			),
 			400: errors[404],
 			500: errors[500],
 		},

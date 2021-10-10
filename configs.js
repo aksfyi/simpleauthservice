@@ -2,13 +2,14 @@ require("dotenv").config();
 
 const configs = {
 	MONGO_URI: process.env.MONGO_URI,
-	ENVIRONMENT: process.env.ENVIRONMENT || "dev",
+	ENVIRONMENT: process.env.ENVIRONMENT || keywords.DEVELOPMENT_ENV,
 	CHECK_ADMIN: process.env.CHECK_ADMIN === "0" ? false : true,
 	// Fastify will run on 127.0.0.1 if not set
 	// Set this to 0.0.0.0 when deploying using docker
 	// Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server
 	HOST: process.env.HOST,
 	JWT_KEY: process.env.JWT_KEY,
+	COOKIE_SECRET: process.env.COOKIE_SECRET,
 	PORT: process.env.PORT || 5000,
 	AUTH_SERVICE_HOST:
 		process.env.AUTH_SERVICE_HOST ||
@@ -92,6 +93,11 @@ if (configs.HTTP_PROTOCOL) {
 	}
 }
 
+const keywords = {
+	DEVELOPMENT_ENV: "development",
+	PRODUCTION_ENV: "production",
+};
+
 // To send in root Route
 checkConfigs = {
 	isSMTPconfigured: configs.IS_SMTP_CONFIGURED,
@@ -106,4 +112,5 @@ checkConfigs = {
 module.exports = {
 	configs,
 	checkConfigs,
+	keywords,
 };
