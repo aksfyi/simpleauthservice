@@ -46,7 +46,7 @@ const authenticationRoutes = (fastify, _, done) => {
 	fastify.route({
 		method: "GET",
 		url: "/confirmEmail",
-		preHandler: tokenCheck("confirmEmail"),
+		preHandler: tokenCheck("confirmEmail", true),
 		schema: authenticationSchema.confirmEmailGet,
 		handler: confirmEmailTokenRedirect,
 	});
@@ -78,7 +78,7 @@ const authenticationRoutes = (fastify, _, done) => {
 	fastify.route({
 		method: "GET",
 		url: "/resetPassword",
-		preHandler: tokenCheck("password"),
+		preHandler: tokenCheck("password", true),
 		schema: authenticationSchema.resetPasswordGet,
 		handler: resetPasswordTokenRedirect,
 	});

@@ -38,7 +38,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!token) {
-			sendErrorResponse(reply, 400, "Invalid Token", redirectURL);
+			sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
 		}
 
 		const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -58,7 +58,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!user) {
-			sendErrorResponse(reply, 400, "Invalid Token", redirectURL);
+			sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
 		}
 		if (type === "password") {
 			check = user.isPwResetTokenExpired();
@@ -67,7 +67,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (check) {
-			sendErrorResponse(reply, 400, "Link expired", redirectURL);
+			sendErrorResponse(reply, 400, "Link expired", { redirectURL });
 		}
 
 		request.userModel = user;
