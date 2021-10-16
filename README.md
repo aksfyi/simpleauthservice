@@ -1,5 +1,20 @@
-﻿# Simpleauth
+﻿# Simple Auth Service [UNDER DEVELOPMENT]
+
 Simple authentication service written using fastify + mongodb(mongoose)
+
+## Table of contents
+- [Simple Auth Service [UNDER DEVELOPMENT]](#simple-auth-service-under-development)
+  - [Table of contents](#table-of-contents)
+  - [Features](#features)
+    - [Login with Oauth2 Providers](#login-with-oauth2-providers)
+  - [Setting up Locally](#setting-up-locally)
+    - [Configuring Environment variables](#configuring-environment-variables)
+    - [SMTP Configuration](#smtp-configuration)
+    - [Oauth2 Provider Configurations](#oauth2-provider-configurations)
+    - [Application configurations](#application-configurations)
+  - [Swagger UI documentation](#swagger-ui-documentation)
+  - [Dependencies](#dependencies)
+
 ## Features
  - [x] Sign up and Login 
  - [x] Email verification
@@ -7,6 +22,9 @@ Simple authentication service written using fastify + mongodb(mongoose)
  - [x] Refresh Token Support
  - [x] Swagger UI for development environment
 
+### Login with Oauth2 Providers
+- [x] Github
+- [x] Google
 ## Setting up Locally
 
  - Clone the repository
@@ -19,12 +37,15 @@ Simple authentication service written using fastify + mongodb(mongoose)
 |Environment variable  |  |Default (If not configured)|
 |--|--|--|
 |  MONGO_URI | MongoDB URI |-|
-| ENVIRONMENT | Product environment |"dev"|
-|  CHECK_ADMIN| Checks if admin user exists when signing up |0 (1 to check)|
+| ENVIRONMENT | Product environment |`keywords.DEVELOPMENT_ENV` . Check `configs.js`|
+|  CHECK_ADMIN| Checks if admin user exists when signing up |1 (0 to skip check)|
 | JWT_KEY |Key used to sign JWT  |-|
 | PORT |Application Port  |5000|
 | ALLOW_CORS_ORIGIN | Origin for Cors |Disables CORS if its not configured|
+| DISABLE_MAIL | Setting it to 1 , disables sending emails|-|
+| HTTP_PROTOCOL| http or https | `request.protocol` |
 |  SEND_NEW_LOGIN_EMAIL| Send email alert if the user is logged in |0 (1 to send)|
+| HOST | Fastify will run on 127.0.0.1 if HOST not set.Set this to 0.0.0.0 when deploying using docker.Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server | Fastify will run the application in localhost (127.0.0.1) by default |
 ### SMTP Configuration
 Configurations required to send email
 |Environment variable  |
@@ -35,6 +56,16 @@ Configurations required to send email
 |  SMTP_PASSWORD|  
 | FROM_NAME | 
 | FROM_EMAIL | 
+
+### Oauth2 Provider Configurations
+
+|Environment variable  | |
+|--|--|
+| [PROVIDER]_CLIENT_ID | |
+| [PROVIDER]_CLIENT_SECRET | | 
+| [PROVIDER]_REDIRECT_URI | Frontend URL to which the provider redirects with `code` or error message|
+
+
 
 
 ### Application configurations
@@ -60,10 +91,14 @@ To access API documentation go to `http://localhost:{PORT}/documentation`
 | fastify| Fast and low overhead web framework, for Node.js |
 |fastify-cors|Add cors support|
 |fastify-swagger|Swagger UI|
+|fastify-cookie | A plugin for Fastify that adds support for reading and setting cookies.|
+|fastify-helmet |Important security headers for Fastify. It is a tiny wrapper around helmet.|
+|axios|Sending requests to oauth resource servers|
 |jsonwebtoken|Generate and verify JSON web tokens|
 |mongoose|MongoDB ORM|
 |mustache|Process HTML templates for emails|
 |nodemailer|Send Email|
+|node-cron|Run Cron Jobs|
 
 Email templates from https://github.com/wildbit/postmark-templates
      

@@ -2,6 +2,13 @@ const jwt = require("jsonwebtoken");
 const { configs } = require("../configs");
 const { sendErrorResponse } = require("../handlers/responseHelpers");
 
+/**
+ * Plugin to verify if the user is authenticated/authorized to access
+ * route.
+ * @param {Array} roles Example ['user'] , ['admin'] , ['user','admin']
+ * @param {Boolean} emailConfRequired
+ * @returns
+ */
 const verifyAuth = (roles = [], emailConfRequired) => {
 	return function (request, reply, done) {
 		// Get the authorization header
@@ -31,7 +38,6 @@ const verifyAuth = (roles = [], emailConfRequired) => {
 
 			if (!roles.includes(decoded.role)) {
 				// If the user's role is not authorized to access the endpoint send error
-
 				sendErrorResponse(
 					reply,
 					403,

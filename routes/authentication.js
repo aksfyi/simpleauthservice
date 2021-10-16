@@ -12,7 +12,7 @@ const {
 	revokeRefreshToken,
 	revokeAllRefreshTokens,
 	getProfile,
-} = require("../handlers/authentication");
+} = require("../handlers/authenticationHandler");
 const { verifyAuth } = require("../plugins/authVerify");
 const {
 	checkDeactivated,
@@ -20,6 +20,8 @@ const {
 	attachUser,
 	attachUserWithPassword,
 	checkPasswordLength,
+	checkMailingDisabled,
+	refreshTokenValidation,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
@@ -44,7 +46,7 @@ const authenticationRoutes = (fastify, _, done) => {
 	fastify.route({
 		method: "GET",
 		url: "/confirmEmail",
-		preHandler: tokenCheck("confirmEmail"),
+		preHandler: tokenCheck("confirmEmail", true),
 		schema: authenticationSchema.confirmEmailGet,
 		handler: confirmEmailTokenRedirect,
 	});
@@ -56,6 +58,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		schema: authenticationSchema.confirmEmailPost,
 		preHandler: [
 			verifyAuth(["admin", "user"], false),
+			checkMailingDisabled,
 			checkDeactivated,
 			attachUser(false, false),
 		],
@@ -75,7 +78,7 @@ const authenticationRoutes = (fastify, _, done) => {
 	fastify.route({
 		method: "GET",
 		url: "/resetPassword",
-		preHandler: tokenCheck("password"),
+		preHandler: tokenCheck("password", true),
 		schema: authenticationSchema.resetPasswordGet,
 		handler: resetPasswordTokenRedirect,
 	});
@@ -85,6 +88,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/resetPassword",
 		schema: authenticationSchema.resetPasswordPost,
+		preHandler: checkMailingDisabled,
 		handler: requestResetPasswordToken,
 	});
 
@@ -126,15 +130,19 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/refresh",
 		schema: authenticationSchema.refreshJWTToken,
+		preHandler: refreshTokenValidation,
 		handler: getJWTFromRefresh,
 	});
 
-	// Route to revoke refresh token
 	fastify.route({
 		method: "PUT",
-		url: "/revoke",
+		url: "/refresh/revoke",
 		schema: authenticationSchema.revokeRefreshToken,
-		preHandler: [verifyAuth(["admin", "user"], false), checkDeactivated],
+		preHandler: [
+			verifyAuth(["admin", "user"], false),
+			checkDeactivated,
+			refreshTokenValidation,
+		],
 		handler: revokeRefreshToken,
 	});
 

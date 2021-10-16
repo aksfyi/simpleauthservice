@@ -2,11 +2,17 @@ const crypto = require("crypto");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const { configs } = require("../configs");
 
 const userSchema = new mongoose.Schema({
 	name: {
 		type: String,
 		required: [true, "Please submit the name"],
+	},
+	uid: {
+		type: String,
+		required: true,
+		unique: true,
 	},
 	email: {
 		type: String,
@@ -17,9 +23,15 @@ const userSchema = new mongoose.Schema({
 			"Please submit a valid email",
 		],
 	},
+	provider: {
+		// Provider used during sign up
+		// This is not updated if the user uses a different
+		// oauth provider for sign in
+		type: String,
+		enum: ["email", ...configs.SUPPORTED_PROVIDERS],
+	},
 	password: {
 		type: String,
-		required: [true, "Please submit a password"],
 		minlength: 8,
 		select: false, // this will not be added to db
 	},
@@ -57,7 +69,7 @@ const userSchema = new mongoose.Schema({
 	},
 	createdAt: {
 		type: Date,
-		default: Date.now(),
+		default: Date.now,
 	},
 	deactivatedAt: Date,
 });
@@ -68,8 +80,8 @@ userSchema.methods.getJWT = function () {
 		{
 			id: this._id,
 			role: this.role,
-			email: this.email,
 			name: this.name,
+			uid: this.uid,
 			isEmailConfirmed: this.isEmailConfirmed,
 			// isAccountVerified: this.isAccountVerified,
 			isDeactivated: this.isDeactivated,
@@ -106,7 +118,7 @@ userSchema.methods.isPwResetTokenExpired = function () {
 	if (!this.pwResetExpire) {
 		return true;
 	}
-	return Date.now >= this.pwResetExpire;
+	return Date.now() >= this.pwResetExpire;
 };
 
 userSchema.methods.getEmailConfirmationToken = function () {
@@ -128,7 +140,7 @@ userSchema.methods.isConfirmEmailTokenExpired = function () {
 	if (!this.confirmEmailTokenExpire) {
 		return true;
 	}
-	return Date.now >= this.confirmEmailTokenExpire;
+	return Date.now() >= this.confirmEmailTokenExpire;
 };
 
 module.exports = mongoose.model("User", userSchema);

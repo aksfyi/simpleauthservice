@@ -649,9 +649,9 @@ const confirmEmailTemplate = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Trans
                                                          margin: 0.4em 0 1.1875em;
                                                      "
                                                  >
-                                                    Please confirm your email address to verify your account
+                                                    Please confirm your email address to verify your account.
                                                      <strong
-                                                         >This will is only valid for the next 6
+                                                         >This link will be valid for the next 6
                                                          hours</strong
                                                      >
                                                  </p>

@@ -1,53 +1,17 @@
 const { configs } = require("../../configs");
+const {
+	responseErrors,
+	jwtSecurity,
+	getSuccessObject,
+	getEmailStatusResponse,
+} = require("./common");
 
-const getCommonProperties = (statusCode, successValue) => ({
-	statusCode: { type: "integer", example: statusCode },
-	message: { type: "string" },
-	success: { type: "boolean", example: successValue },
-});
-
-const getErrorProperties = (statusCode, successValue) => ({
-	...getCommonProperties(statusCode, successValue),
-	error: { type: "string" },
-});
-
-const getSuccessObject = (statusCode, successValue, description, props) => ({
-	type: "object",
-	description,
-	properties: { ...getCommonProperties(statusCode, successValue), ...props },
-});
-const errors = {
-	400: {
-		description: "Bad Request",
-		type: "object",
-		properties: getErrorProperties(400, false),
-	},
-	500: {
-		description: "Internal Server Error",
-		type: "object",
-		properties: getErrorProperties(500, false),
-	},
-	404: {
-		description: "Not found",
-		type: "object",
-		properties: getErrorProperties(404, false),
-	},
-};
-
-const security = [
-	{
-		JWTToken: {
-			description: 'Authorization header token, sample: "Bearer {token}"',
-			type: "apiKey",
-			name: "Authorization",
-			in: "header",
-		},
-	},
-];
+const errors = responseErrors;
 
 const authenticationSchema = {
 	signup: {
-		description: "Sign up to the service",
+		description:
+			"Sign up to the service. Returns JWT token and sets Refresh token as cookie",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -65,14 +29,14 @@ const authenticationSchema = {
 		response: {
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			400: errors[404],
 			500: errors[500],
 		},
 	},
 	signin: {
-		description: "Sign in to get JWT and Refresh Token",
+		description: "Sign in .Returns JWT token and sets Refresh token as cookie",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -89,7 +53,7 @@ const authenticationSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			400: errors[400],
 			500: errors[500],
@@ -118,7 +82,8 @@ const authenticationSchema = {
 	},
 	confirmEmailPut: {
 		description:
-			"Check if the confirm email token and send success or failure response",
+			"Check if the confirm email token is valid, update the user document\
+			 and send success or failure response",
 		tags: ["Confirm Email Address"],
 		body: {
 			type: "object",
@@ -137,11 +102,13 @@ const authenticationSchema = {
 		description: "Request for link to confirm email address",
 		tags: ["Confirm Email Address"],
 		response: {
-			200: getSuccessObject(200, true, "Confirmation email sent", {}),
+			200: getSuccessObject(200, true, "Confirmation email sent", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},
-		security,
+		security: jwtSecurity,
 	},
 	resetPasswordPost: {
 		description: "Request link for resetting password",
@@ -154,7 +121,9 @@ const authenticationSchema = {
 			required: ["email"],
 		},
 		response: {
-			200: getSuccessObject(200, true, "Reset Link Sent to Email", {}),
+			200: getSuccessObject(200, true, "Reset Link Sent to Email", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			404: errors[404],
 			500: errors[500],
@@ -194,7 +163,9 @@ const authenticationSchema = {
 			required: ["token", "password", "confirmPassword"],
 		},
 		response: {
-			200: getSuccessObject(200, true, "Password Reset Successful", {}),
+			200: getSuccessObject(200, true, "Password Reset Successful", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},
@@ -211,9 +182,11 @@ const authenticationSchema = {
 			},
 			required: ["currentPassword", "password", "confirmPassword"],
 		},
-		security,
+		security: jwtSecurity,
 		response: {
-			200: getSuccessObject(200, true, "Password Reset Successful", {}),
+			200: getSuccessObject(200, true, "Password Reset Successful", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},
@@ -221,7 +194,7 @@ const authenticationSchema = {
 	profile: {
 		description: "Get profile information of the logged in user",
 		tags: ["User"],
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(200, true, "Get Profile Successful", {
 				role: { type: "string" },
@@ -235,16 +208,9 @@ const authenticationSchema = {
 		},
 	},
 	refreshJWTToken: {
-		description: "Get new Refresh token",
+		description:
+			"Get new JWT token from refresh token in the cookie. Sets new Refresh token in the cookie",
 		tags: ["Refresh Token"],
-		body: {
-			type: "object",
-			properties: {
-				refreshToken: { type: "string" },
-			},
-			required: ["refreshToken"],
-		},
-		security,
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
@@ -255,15 +221,10 @@ const authenticationSchema = {
 		},
 	},
 	revokeRefreshToken: {
-		description: "Revoke Refresh Token",
+		description:
+			"Revoke Refresh Token Sent from cookie. Used when logging out users",
 		tags: ["Refresh Token"],
-		body: {
-			type: "object",
-			properties: {
-				refreshToken: { type: "string" },
-			},
-			required: ["refreshToken"],
-		},
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(
 				200,
@@ -278,7 +239,7 @@ const authenticationSchema = {
 	revokeAll: {
 		description: "Revoke All refresh tokens of the logged in user",
 		tags: ["Refresh Token"],
-		security,
+		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(
 				200,

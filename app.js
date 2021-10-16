@@ -1,15 +1,29 @@
 const fastify = require("fastify")({ logger: true });
-const { configs } = require("./configs");
+const { configs, checkConfigs, keywords } = require("./configs");
+const { sendSuccessResponse } = require("./handlers/responseHelpers");
+const jobsInit = require("./jobs/init");
 const { connectDB } = require("./models/connectDB");
 const { getErrorHandler } = require("./plugins/errorHandler");
 const { authenticationRoutes } = require("./routes/authentication");
+const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
+const helmet = require("fastify-helmet");
 
-// Connect to MongoDB Database
-connectDB();
+// fastify-helmet adds various HTTP headers for security
+if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
+	// https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+	fastify.register(helmet, { contentSecurityPolicy: false });
+}
+
+if (configs.COOKIE_SECRET) {
+	fastify.register(require("fastify-cookie"), {
+		secret: configs.COOKIE_SECRET, // For signing cookies
+		parseOptions: {},
+	});
+}
 
 // Enable swagger ui in development environment
-if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 	fastify.register(require("fastify-swagger"), getSwaggerOptions());
 }
 
@@ -23,15 +37,36 @@ if (configs.ALLOW_CORS_ORIGIN) {
 // Set error Handler
 fastify.setErrorHandler(getErrorHandler(fastify));
 
-//	Register Routes required for authentication
+// Register Routes required for authentication
 fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
+
+// Register oauth2 routes
+fastify.register(oauth2Routes, { prefix: "api/v1/auth/oauth" });
+
+// Auth Service health check
+fastify.get("/", async (request, reply) => {
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: "Application is running",
+		...checkConfigs,
+	});
+});
 
 // Start the server
 const start = async () => {
 	try {
-		await fastify.listen(configs.PORT);
-		if (configs.ENVIRONMENT.toLowerCase() === "dev") {
-			fastify.swagger();
+		if (configs.JWT_KEY && configs.MONGO_URI && configs.COOKIE_SECRET) {
+			// Connect to MongoDB Database
+			connectDB(fastify);
+			await fastify.listen(configs.PORT, configs.HOST);
+			if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
+				fastify.swagger();
+			}
+
+			// Start Cron Jobs
+			jobsInit(fastify);
+		} else {
+			fastify.log.error("Please configure the required environment variables");
 		}
 	} catch (err) {
 		fastify.log.error(err);

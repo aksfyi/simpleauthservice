@@ -1,16 +1,20 @@
-const { configs } = require("../configs");
+const { configs, keywords } = require("../configs");
 const { sendErrorResponse } = require("../handlers/responseHelpers");
 
 const getErrorHandler = (fastify) => {
 	return function (err, request, reply) {
-		fastify.log.error(err);
+		if (configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
+			fastify.log.error(err);
+		} else {
+			fastify.log.error(err.message);
+		}
 
 		//Default Status code and error message
 		let statusCode = 500;
 		let message = "Error in the server";
 
 		//Send messages as response in development environment
-		if (configs.ENVIRONMENT.toLowerCase() === "dev") {
+		if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 			message = err.message;
 		}
 

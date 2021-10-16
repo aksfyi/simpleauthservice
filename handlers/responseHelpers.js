@@ -1,4 +1,6 @@
-const sendErrorResponse = (reply, statusCode, message, redirectURL) => {
+const { getRefreshTokenOptns } = require("../utils/authhelpers");
+
+const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 	let error = "Internal Server Error";
 	switch (statusCode) {
 		case 400:
@@ -13,7 +15,10 @@ const sendErrorResponse = (reply, statusCode, message, redirectURL) => {
 		default:
 			break;
 	}
-	if (!redirectURL) {
+	if (!options.redirectURL) {
+		if (options.clearCookie) {
+			reply.clearCookie("refreshToken", getRefreshTokenOptns());
+		}
 		reply.status(statusCode).send({
 			statusCode,
 			error,
@@ -24,14 +29,24 @@ const sendErrorResponse = (reply, statusCode, message, redirectURL) => {
 		reply
 			.code(302)
 			.redirect(
-				`${redirectURL}?error=${error}&message=${message}&success=false`
+				`${options.redirectURL}?error=${error}&message=${message}&success=false`
 			);
 	}
 	reply.sent = true;
 };
 
-const sendSuccessResponse = (reply, response, redirectURL) => {
-	if (!redirectURL) {
+const sendSuccessResponse = (reply, response, options = {}) => {
+	if (!options.redirectURL) {
+		if (options.refreshToken) {
+			reply.setCookie(
+				"refreshToken",
+				options.refreshToken,
+				getRefreshTokenOptns()
+			);
+		}
+		if (options.clearCookie) {
+			reply.clearCookie("refreshToken", getRefreshTokenOptns());
+		}
 		reply.code(response.statusCode).send({
 			...response,
 			success: true,
@@ -40,14 +55,16 @@ const sendSuccessResponse = (reply, response, redirectURL) => {
 		reply
 			.code(302)
 			.redirect(
-				`${redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
+				`${options.redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
 			);
 	}
 	reply.sent = true;
 };
 
-const redirectWithToken = (reply, token, redirectURL) => {
-	reply.code(302).redirect(`${redirectURL}?token=${token}&success=true`);
+const redirectWithToken = (reply, token, options) => {
+	reply
+		.code(302)
+		.redirect(`${options.redirectURL}?token=${token}&success=true`);
 	reply.sent = true;
 };
 

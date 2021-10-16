@@ -3,27 +3,21 @@ const {
 	getRefreshToken,
 	revokeAllRfTokenByUser,
 } = require("../utils/authhelpers");
-
 const User = require("../models/user");
 const RefreshToken = require("../models/refreshToken");
 const crypto = require("crypto");
 const { configs } = require("../configs");
-const { sendEmail, renderTemplate } = require("../utils/sendEmail");
+const {
+	confirmationEmailHelper,
+	passwordChangedEmailAlert,
+	sendNewLoginEmail,
+	passwordResetEmailHelper,
+} = require("../utils/services/sendEmail");
 const {
 	sendErrorResponse,
 	sendSuccessResponse,
 	redirectWithToken,
 } = require("./responseHelpers");
-const {
-	confirmEmailTemplate,
-} = require("../utils/emailTemplates/confirmEmail");
-const {
-	passwordChangedTemplate,
-} = require("../utils/emailTemplates/passwordChanged");
-const {
-	resetPasswordTemplate,
-} = require("../utils/emailTemplates/resetPassword");
-const { newLoginTemplate } = require("../utils/emailTemplates/newLoginEmail");
 
 // @route	POST /api/v1/auth/signup
 // @desc	handler for registering user to database, returns
@@ -31,6 +25,7 @@ const { newLoginTemplate } = require("../utils/emailTemplates/newLoginEmail");
 // @access	Public
 const registerUser = async (request, reply) => {
 	let { name, email, password } = request.body;
+	let provider = "email";
 	password = await hashPasswd(password);
 	let role = "user";
 
@@ -44,28 +39,37 @@ const registerUser = async (request, reply) => {
 
 	const user = await User.create({
 		name,
+		uid: crypto.randomBytes(15).toString("hex"),
 		email,
 		password,
 		role,
+		provider,
 	});
 
 	const confirmationToken = user.getEmailConfirmationToken();
-	user.save({ validateBeforeSave: false });
+	user.save({ validateBeforeSave: true });
 
 	const refreshToken = await getRefreshToken(user, request.ip);
 
-	emailMessage = await confirmationEmailHelper(
+	const emailStatus = await confirmationEmailHelper(
 		user,
 		request,
 		confirmationToken
 	);
 
-	sendSuccessResponse(reply, {
-		statusCode: 201,
-		message: "Sign up successful." + emailMessage,
-		token: user.getJWT(),
-		refreshToken,
-	});
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 201,
+			message: "Sign up successful",
+			token: user.getJWT(),
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
+		},
+		{
+			refreshToken,
+		}
+	);
 };
 
 // @route 	 POST /api/v1/auth/signin
@@ -84,29 +88,21 @@ const signin = async (request, reply) => {
 		if (await user.matchPasswd(password)) {
 			const refreshToken = await getRefreshToken(user, request.ip);
 
-			if (configs.SEND_NEW_LOGIN_EMAIL) {
-				await sendEmail({
-					email: user.email,
-					subject: `Important : New Login to your ${configs.APP_NAME} account`,
-					html: renderTemplate(
-						{
-							username: user.name,
-							appName: configs.APP_NAME,
-							appDomain: configs.APP_DOMAIN,
-							ip: request.ip,
-							ua: request.headers["user-agent"],
-						},
-						newLoginTemplate
-					),
-				});
-			}
+			const emailStatus = await sendNewLoginEmail(user, request);
 
-			sendSuccessResponse(reply, {
-				statusCode: 200,
-				message: "Signed in",
-				token: user.getJWT(),
-				refreshToken,
-			});
+			sendSuccessResponse(
+				reply,
+				{
+					statusCode: 200,
+					message: "Signed in",
+					token: user.getJWT(),
+					emailSuccess: emailStatus.success,
+					emailMessage: emailStatus.message,
+				},
+				{
+					refreshToken,
+				}
+			);
 		} else {
 			sendErrorResponse(reply, 400, "Password Does not match");
 		}
@@ -117,11 +113,9 @@ const signin = async (request, reply) => {
 // @desc	Endpoint to confirm the email of the user
 // @access	Public (confirm email with the token . JWT is NOT required)
 const confirmEmailTokenRedirect = async (request, reply) => {
-	redirectWithToken(
-		reply,
-		request.query.token,
-		configs.APP_CONFIRM_EMAIL_REDIRECT
-	);
+	redirectWithToken(reply, request.query.token, {
+		redirectURL: configs.APP_CONFIRM_EMAIL_REDIRECT,
+	});
 };
 
 // @route 	PUT /api/v1/auth/confirmEmail
@@ -156,15 +150,21 @@ const requestConfirmationEmail = async (request, reply) => {
 		const confirmationToken = user.getEmailConfirmationToken();
 		user.save({ validateBeforeSave: false });
 
-		emailMessage = await confirmationEmailHelper(
+		const emailStatus = await confirmationEmailHelper(
 			user,
 			request,
 			confirmationToken
 		);
 
+		if (!emailStatus.success) {
+			sendErrorResponse(reply, 500, emailStatus.message);
+		}
+
 		reply.send({
 			statusCode: 200,
-			message: emailMessage,
+			message: emailStatus.message,
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -188,26 +188,23 @@ const requestResetPasswordToken = async (request, reply) => {
 		sendErrorResponse(reply, 400, "Please check your email, try again later");
 	} else {
 		const pwResetToken = user.getPwResetToken();
-		const resetUrl = `${request.protocol}://${request.hostname}/api/v1/auth/resetPassword?token=${pwResetToken}`;
 		await user.save({ validateBeforeSave: false });
 
-		emailMessage = await sendEmail({
-			email: user.email,
-			subject: "Reset Password Link",
-			html: renderTemplate(
-				{
-					username: user.name,
-					buttonHREF: resetUrl,
-					appName: configs.APP_NAME,
-					appDomain: configs.APP_DOMAIN,
-				},
-				resetPasswordTemplate
-			),
-		});
+		const emailStatus = await passwordResetEmailHelper(
+			user,
+			request,
+			pwResetToken
+		);
+
+		if (!emailStatus.success) {
+			sendErrorResponse(reply, 500, emailStatus.message);
+		}
 
 		reply.send({
 			statusCode: 200,
-			message: emailMessage,
+			message: emailStatus.message,
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -217,11 +214,9 @@ const requestResetPasswordToken = async (request, reply) => {
 //		  	verifies the token and redirects to frontend
 // @access 	Public
 const resetPasswordTokenRedirect = async (request, reply) => {
-	redirectWithToken(
-		reply,
-		request.query.token,
-		configs.APP_RESET_PASSWORD_REDIRECT
-	);
+	redirectWithToken(reply, request.query.token, {
+		redirectURL: configs.APP_RESET_PASSWORD_REDIRECT,
+	});
 };
 
 // @route 	PUT /api/v1/auth/resetPassword
@@ -244,11 +239,14 @@ const resetPasswordFromToken = async (request, reply) => {
 		user.pwResetToken = undefined;
 		user.pwResetExpire = undefined;
 		user.save({ validateBeforeSave: true });
-		await passwordChangedEmailAlert(user, request);
+
+		const emailStatus = await passwordChangedEmailAlert(user, request);
 
 		sendSuccessResponse(reply, {
 			statusCode: 200,
 			message: "Password Updated",
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -273,25 +271,28 @@ const updatePassword = async (request, reply) => {
 			"Password and confirmed password are different"
 		);
 	}
+
 	await revokeAllRfTokenByUser(user, request.ip);
 
 	user.password = await hashPasswd(password);
 
 	user.save();
-	await passwordChangedEmailAlert(user, request);
+
+	const emailStatus = await passwordChangedEmailAlert(user, request);
 
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Password Updated",
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
 	});
 };
 
-// @route 	PUT /api/v1/auth/profile
+// @route 	GET /api/v1/auth/profile
 // @desc 	Route used to get user Info
 // @access	Private(requires JWT token in header)
 const getProfile = async (request, reply) => {
 	const user = request.user;
-	console.log(user);
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "User Found",
@@ -299,14 +300,24 @@ const getProfile = async (request, reply) => {
 	});
 };
 
-// @route 	/api/v1/auth/refresh
+// @route 	POST /api/v1/auth/refresh
 // @desc 	Get new jwt token and refresh token from unused refresh token
 //		 	(refresh token should be used only once)
 // @access 	Private (JWT is not required but refresh token is required)
 const getJWTFromRefresh = async (request, reply) => {
-	const { refreshToken } = request.body;
+	// Fastify-cookie has a function which can be used to sign & unsign tokens
+	// unsignCookie returns valid, renew & false
+	// valid (boolean) : the cookie has been unsigned successfully
+	// renew (boolean) : the cookie has been unsigned with an old secret
+	// value (string/null) : if the cookie is valid then returns string else null
+	let refreshToken = request.unsignCookie(request.cookies.refreshToken);
+
+	if (!refreshToken.valid) {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+	}
+
 	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+		token: crypto.createHash("sha256").update(refreshToken.value).digest("hex"),
 		isRevoked: false,
 	});
 	if (!rft) {
@@ -326,48 +337,67 @@ const getJWTFromRefresh = async (request, reply) => {
 	rft.save();
 	const newRefreshToken = await getRefreshToken(user, request.ip);
 
-	sendSuccessResponse(reply, {
-		statusCode: 200,
-		message: "Refresh token : successful",
-		token: jwtToken,
-		refreshToken: newRefreshToken,
-	});
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 200,
+			message: "Refresh token : successful",
+			token: jwtToken,
+		},
+		{
+			refreshToken: newRefreshToken,
+		}
+	);
 };
 
-// @route 	PUT /api/v1/auth/revoke
-// @desc	revokes the refresh token
+// @route 	PUT /api/v1/auth/refresh/revoke
+// @desc	revokes the refresh token. Used when logging out
 // @access  Private(required JWT in authorization header)
 const revokeRefreshToken = async (request, reply) => {
-	const { refreshToken } = request.body;
 	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
+		token: crypto
+			.createHash("sha256")
+			.update(request.refreshToken)
+			.digest("hex"),
 		isRevoked: false,
 	});
 
+	const sendInvalidToken = () => {
+		sendErrorResponse(reply, 400, "Invalid Refresh Token", {
+			clearCookie: true,
+		});
+	};
+
 	if (!rft) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+		sendInvalidToken();
 	}
 
 	const user = await User.findById(rft.user);
 
 	if (!user) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+		sendInvalidToken();
 	}
 
 	if (user.email !== request.user.email) {
 		// Check whether the refresh token was created by the same user
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+		sendInvalidToken();
 	}
 
 	if (rft.isExpired()) {
-		sendErrorResponse(reply, 400, "Refresh Token Expired");
+		sendErrorResponse(reply, 400, "Refresh Token Expired", {
+			clearCookie: true,
+		});
 	}
 	rft.revoke(request.ip);
 	rft.save();
-	sendSuccessResponse(reply, {
-		statusCode: 200,
-		message: "Refresh token successfully revoked",
-	});
+	sendSuccessResponse(
+		reply,
+		{
+			statusCode: 200,
+			message: "Refresh token successfully revoked",
+		},
+		{ clearCookie: true }
+	);
 };
 
 // @route 	PUT /api/v1/auth/revokeAll
@@ -380,41 +410,6 @@ const revokeAllRefreshTokens = async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Successfully revoked all tokens",
-	});
-};
-
-const confirmationEmailHelper = async (user, request, confirmationToken) => {
-	const confirmationUrl = `${request.protocol}://${request.hostname}/api/v1/auth/confirmEmail?token=${confirmationToken}`;
-
-	return await sendEmail({
-		email: user.email,
-		subject: "Email confirmation token",
-		html: renderTemplate(
-			{
-				username: user.name,
-				buttonHREF: confirmationUrl,
-				appName: configs.APP_NAME,
-				appDomain: configs.APP_DOMAIN,
-			},
-			confirmEmailTemplate
-		),
-	});
-};
-
-const passwordChangedEmailAlert = async (user, request) => {
-	return await sendEmail({
-		email: user.email,
-		subject: "Security Alert",
-		html: renderTemplate(
-			{
-				username: user.name,
-				appName: configs.APP_NAME,
-				appDomain: configs.appDomain,
-				ip: request.ip,
-				ua: request.headers["user-agent"],
-			},
-			passwordChangedTemplate
-		),
 	});
 };
 
