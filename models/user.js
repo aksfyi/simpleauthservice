@@ -80,7 +80,6 @@ userSchema.methods.getJWT = function () {
 		{
 			id: this._id,
 			role: this.role,
-			email: this.email,
 			name: this.name,
 			uid: this.uid,
 			isEmailConfirmed: this.isEmailConfirmed,

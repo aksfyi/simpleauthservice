@@ -5,7 +5,7 @@ const { getRefreshToken } = require("../utils/authhelpers");
 const {
 	sendNewLoginEmail,
 	confirmationEmailHelper,
-} = require("../utils/sendEmail");
+} = require("../utils/services/sendEmail");
 const { OauthProviderLogin } = require("../utils/services/oauthProviderLogin");
 const { sendErrorResponse, sendSuccessResponse } = require("./responseHelpers");
 const crypto = require("crypto");
@@ -75,7 +75,10 @@ const postOauthProviderLogin = async (request, reply) => {
 const oauthLoginHelper = async (request, reply, userInfo) => {
 	const { name, email, provider, verified, role } = userInfo;
 	let confirmationToken;
-	let emailMessage = "";
+	let emailStatus = {
+		success: true,
+		message: "Email was not sent, since user email was already verified",
+	};
 	let user = await User.findOne({
 		email,
 		isDeactivated: false,
@@ -83,7 +86,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 	if (user) {
 		const refreshToken = await getRefreshToken(user, request.ip);
 
-		await sendNewLoginEmail(user, request);
+		const emailStatus = await sendNewLoginEmail(user, request);
 
 		sendSuccessResponse(
 			reply,
@@ -91,6 +94,8 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 				statusCode: 200,
 				message: "Signed in",
 				token: user.getJWT(),
+				emailSuccess: emailStatus.success,
+				emailMessage: emailStatus.message,
 			},
 			{ refreshToken }
 		);
@@ -98,6 +103,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 		user = await User.create({
 			name,
 			email,
+			uid: crypto.randomBytes(15).toString("hex"),
 			isEmailConfirmed: verified,
 			provider,
 			role,
@@ -107,7 +113,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 		}
 		user.save({ validateBeforeSave: true });
 		if (confirmationToken) {
-			emailMessage = await confirmationEmailHelper(
+			emailStatus = await confirmationEmailHelper(
 				user,
 				request,
 				confirmationToken
@@ -118,8 +124,10 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			reply,
 			{
 				statusCode: 201,
-				message: "Sign up successful." + emailMessage,
+				message: "Sign up successful",
 				token: user.getJWT(),
+				emailSuccess: emailStatus.success,
+				emailMessage: emailStatus.message,
 			},
 			{ refreshToken }
 		);

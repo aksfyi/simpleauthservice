@@ -1,5 +1,9 @@
 const { configs } = require("../../configs");
-const { getSuccessObject, responseErrors } = require("./common");
+const {
+	getSuccessObject,
+	responseErrors,
+	getEmailStatusResponse,
+} = require("./common");
 
 const oauthSchema = {
 	getOauthProviderLogin: {
@@ -57,9 +61,11 @@ const oauthSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			400: responseErrors[400],
 			500: responseErrors[500],

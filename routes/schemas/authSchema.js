@@ -1,5 +1,10 @@
 const { configs } = require("../../configs");
-const { responseErrors, jwtSecurity, getSuccessObject } = require("./common");
+const {
+	responseErrors,
+	jwtSecurity,
+	getSuccessObject,
+	getEmailStatusResponse,
+} = require("./common");
 
 const errors = responseErrors;
 
@@ -24,6 +29,7 @@ const authenticationSchema = {
 		response: {
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			400: errors[404],
 			500: errors[500],
@@ -47,6 +53,7 @@ const authenticationSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
+				...getEmailStatusResponse(),
 			}),
 			400: errors[400],
 			500: errors[500],
@@ -75,7 +82,8 @@ const authenticationSchema = {
 	},
 	confirmEmailPut: {
 		description:
-			"Check if the confirm email token and send success or failure response",
+			"Check if the confirm email token is valid, update the user document\
+			 and send success or failure response",
 		tags: ["Confirm Email Address"],
 		body: {
 			type: "object",
@@ -94,7 +102,9 @@ const authenticationSchema = {
 		description: "Request for link to confirm email address",
 		tags: ["Confirm Email Address"],
 		response: {
-			200: getSuccessObject(200, true, "Confirmation email sent", {}),
+			200: getSuccessObject(200, true, "Confirmation email sent", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},
@@ -111,7 +121,9 @@ const authenticationSchema = {
 			required: ["email"],
 		},
 		response: {
-			200: getSuccessObject(200, true, "Reset Link Sent to Email", {}),
+			200: getSuccessObject(200, true, "Reset Link Sent to Email", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			404: errors[404],
 			500: errors[500],
@@ -151,7 +163,9 @@ const authenticationSchema = {
 			required: ["token", "password", "confirmPassword"],
 		},
 		response: {
-			200: getSuccessObject(200, true, "Password Reset Successful", {}),
+			200: getSuccessObject(200, true, "Password Reset Successful", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},
@@ -170,7 +184,9 @@ const authenticationSchema = {
 		},
 		security: jwtSecurity,
 		response: {
-			200: getSuccessObject(200, true, "Password Reset Successful", {}),
+			200: getSuccessObject(200, true, "Password Reset Successful", {
+				...getEmailStatusResponse(),
+			}),
 			400: errors[400],
 			500: errors[500],
 		},

@@ -12,7 +12,7 @@ const {
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
 	passwordResetEmailHelper,
-} = require("../utils/sendEmail");
+} = require("../utils/services/sendEmail");
 const {
 	sendErrorResponse,
 	sendSuccessResponse,
@@ -51,7 +51,7 @@ const registerUser = async (request, reply) => {
 
 	const refreshToken = await getRefreshToken(user, request.ip);
 
-	emailMessage = await confirmationEmailHelper(
+	const emailStatus = await confirmationEmailHelper(
 		user,
 		request,
 		confirmationToken
@@ -61,8 +61,10 @@ const registerUser = async (request, reply) => {
 		reply,
 		{
 			statusCode: 201,
-			message: "Sign up successful." + emailMessage,
+			message: "Sign up successful",
 			token: user.getJWT(),
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		},
 		{
 			refreshToken,
@@ -86,7 +88,7 @@ const signin = async (request, reply) => {
 		if (await user.matchPasswd(password)) {
 			const refreshToken = await getRefreshToken(user, request.ip);
 
-			await sendNewLoginEmail(user, request);
+			const emailStatus = await sendNewLoginEmail(user, request);
 
 			sendSuccessResponse(
 				reply,
@@ -94,6 +96,8 @@ const signin = async (request, reply) => {
 					statusCode: 200,
 					message: "Signed in",
 					token: user.getJWT(),
+					emailSuccess: emailStatus.success,
+					emailMessage: emailStatus.message,
 				},
 				{
 					refreshToken,
@@ -146,15 +150,21 @@ const requestConfirmationEmail = async (request, reply) => {
 		const confirmationToken = user.getEmailConfirmationToken();
 		user.save({ validateBeforeSave: false });
 
-		emailMessage = await confirmationEmailHelper(
+		const emailStatus = await confirmationEmailHelper(
 			user,
 			request,
 			confirmationToken
 		);
 
+		if (!emailStatus.success) {
+			sendErrorResponse(reply, 500, emailStatus.message);
+		}
+
 		reply.send({
 			statusCode: 200,
-			message: emailMessage,
+			message: emailStatus.message,
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -180,11 +190,21 @@ const requestResetPasswordToken = async (request, reply) => {
 		const pwResetToken = user.getPwResetToken();
 		await user.save({ validateBeforeSave: false });
 
-		emailMessage = await passwordResetEmailHelper(user, request, pwResetToken);
+		const emailStatus = await passwordResetEmailHelper(
+			user,
+			request,
+			pwResetToken
+		);
+
+		if (!emailStatus.success) {
+			sendErrorResponse(reply, 500, emailStatus.message);
+		}
 
 		reply.send({
 			statusCode: 200,
-			message: emailMessage,
+			message: emailStatus.message,
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -219,11 +239,14 @@ const resetPasswordFromToken = async (request, reply) => {
 		user.pwResetToken = undefined;
 		user.pwResetExpire = undefined;
 		user.save({ validateBeforeSave: true });
-		await passwordChangedEmailAlert(user, request);
+
+		const emailStatus = await passwordChangedEmailAlert(user, request);
 
 		sendSuccessResponse(reply, {
 			statusCode: 200,
 			message: "Password Updated",
+			emailSuccess: emailStatus.success,
+			emailMessage: emailStatus.message,
 		});
 	}
 };
@@ -254,11 +277,14 @@ const updatePassword = async (request, reply) => {
 	user.password = await hashPasswd(password);
 
 	user.save();
-	await passwordChangedEmailAlert(user, request);
+
+	const emailStatus = await passwordChangedEmailAlert(user, request);
 
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Password Updated",
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
 	});
 };
 

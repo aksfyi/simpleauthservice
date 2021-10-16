@@ -9,6 +9,13 @@ const getErrorProperties = (statusCode, successValue) => ({
 	error: { type: "string" },
 });
 
+const getEmailStatusResponse = () => {
+	return {
+		emailSuccess: { type: "boolean" },
+		emailMessage: { type: "string" },
+	};
+};
+
 const getSuccessObject = (statusCode, successValue, description, props) => ({
 	type: "object",
 	description,
@@ -49,4 +56,5 @@ module.exports = {
 	getSuccessObject,
 	getCommonProperties,
 	getErrorProperties,
+	getEmailStatusResponse,
 };

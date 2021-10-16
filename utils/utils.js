@@ -6,7 +6,7 @@ const getSwaggerOptions = () => {
 			info: {
 				title: "simpleauth",
 				description:
-					"Simple Authentication Service API \nhttps://github.com/aksty-simpleauth\nhttps://github.com/aksty",
+					"Simple Authentication Service API \nhttps://github.com/aksty/simpleauthservice",
 				version: "0.1.0",
 			},
 			securityDefinitions: {

@@ -39,7 +39,7 @@ const attachUser = (isDeactivated, isEmailConfirmed) => {
 const attachUserWithPassword = (isDeactivated, isEmailConfirmed) => {
 	return async (request, reply) => {
 		const user = await User.findOne({
-			email: request.user.email,
+			uid: request.user.uid,
 			isDeactivated: isDeactivated,
 			isEmailConfirmed: isEmailConfirmed,
 		}).select("+password");

@@ -1,14 +1,16 @@
 const nodemailer = require("nodemailer");
-const { configs } = require("../configs");
+const { configs } = require("../../configs");
 const mustache = require("mustache");
-const { newLoginTemplate } = require("./emailTemplates/newLoginEmail");
-const { passwordChangedTemplate } = require("./emailTemplates/passwordChanged");
-const { confirmEmailTemplate } = require("./emailTemplates/confirmEmail");
-const { resetPasswordTemplate } = require("./emailTemplates/resetPassword");
+const { newLoginTemplate } = require("../emailTemplates/newLoginEmail");
+const {
+	passwordChangedTemplate,
+} = require("../emailTemplates/passwordChanged");
+const { confirmEmailTemplate } = require("../emailTemplates/confirmEmail");
+const { resetPasswordTemplate } = require("../emailTemplates/resetPassword");
 
 const sendEmail = async (options) => {
 	if (configs.DISABLE_MAIL) {
-		return "Mailing is disabled";
+		return emailStatus(false, "Mailing is disabled");
 	}
 	if (configs.IS_SMTP_CONFIGURED) {
 		const transporter = nodemailer.createTransport({
@@ -27,12 +29,20 @@ const sendEmail = async (options) => {
 			html: options.html,
 		};
 
-		const msg = await transporter.sendMail(message);
+		await transporter.sendMail(message);
 
-		return "Email Sent";
+		return emailStatus(true, "Email Sent");
 	} else {
-		return "Failed to send email. Please configure SMTP";
+		return emailStatus(false, "Failed to send email. Please configure SMTP");
 	}
+};
+
+// helper function to send
+const emailStatus = (success, message) => {
+	return {
+		success,
+		message,
+	};
 };
 
 const renderTemplate = (view, template) => {
@@ -122,7 +132,7 @@ const sendNewLoginEmail = async (user, request) => {
 			),
 		});
 	}
-	return;
+	return emailStatus(false, "New login email is disabled");
 };
 
 module.exports = {
