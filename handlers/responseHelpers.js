@@ -1,3 +1,4 @@
+const { configs } = require("../configs");
 const { getRefreshTokenOptns } = require("../utils/authhelpers");
 
 const sendErrorResponse = (reply, statusCode, message, options = {}) => {
@@ -43,6 +44,11 @@ const sendSuccessResponse = (reply, response, options = {}) => {
 				options.refreshToken,
 				getRefreshTokenOptns()
 			);
+
+			// Add refreshToken to response if REFRESH_RESPONSE is enabled
+			if (configs.REFRESH_RESPONSE) {
+				response.refreshToken = options.refreshToken;
+			}
 		}
 		if (options.clearCookie) {
 			reply.clearCookie("refreshToken", getRefreshTokenOptns());

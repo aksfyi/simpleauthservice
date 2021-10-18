@@ -17,7 +17,7 @@ const configs = {
 	ALLOW_CORS_ORIGIN: process.env.ALLOW_CORS_ORIGIN,
 	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL,
 	HTTP_PROTOCOL: process.env.HTTP_PROTOCOL,
-
+	REFRESH_RESPONSE: process.env.REFRESH_RESPONSE === "1" ? true : false,
 	SMTP_HOST: process.env.SMTP_HOST,
 	SMTP_PORT: process.env.SMTP_PORT,
 	SMTP_EMAIL: process.env.SMTP_EMAIL,

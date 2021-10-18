@@ -37,6 +37,11 @@ const responseErrors = {
 		type: "object",
 		properties: getErrorProperties(404, false),
 	},
+	403: {
+		description: "Forbidden",
+		type: "object",
+		properties: getErrorProperties(403, false),
+	},
 };
 
 const jwtSecurity = [

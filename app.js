@@ -8,6 +8,7 @@ const { authenticationRoutes } = require("./routes/authentication");
 const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
 const helmet = require("fastify-helmet");
+const { adminRoutes } = require("./routes/admin");
 
 // fastify-helmet adds various HTTP headers for security
 if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
@@ -43,12 +44,14 @@ fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
 // Register oauth2 routes
 fastify.register(oauth2Routes, { prefix: "api/v1/auth/oauth" });
 
+// Register admin routes
+fastify.register(adminRoutes, { prefix: "api/v1/admin" });
+
 // Auth Service health check
 fastify.get("/", async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Application is running",
-		...checkConfigs,
 	});
 });
 

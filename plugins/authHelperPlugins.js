@@ -65,24 +65,32 @@ const checkMailingDisabled = async (request, reply) => {
 };
 
 const refreshTokenValidation = async (request, reply) => {
-	const refreshTokenCookie = request.cookies.refreshToken;
-	if (!refreshTokenCookie) {
-		sendErrorResponse(reply, 400, "Missing refresh token in cookie");
-	}
+	// If refresh token is sent in request body attach it to request object
+	// (request.refreshToken) else check cookie and validate the token in the cookie
+	// then attach it to request body (request.refreshToken) if the cookie is
+	// valid
+	let refreshTokenBody = request.body.refreshToken;
+	if (!refreshTokenBody) {
+		const refreshTokenCookie = request.cookies.refreshToken;
+		if (!refreshTokenCookie) {
+			sendErrorResponse(reply, 400, "Missing refresh token in cookie");
+		}
+		// Fastify-cookie has a function which can be used to sign & unsign tokens
+		// unsignCookie returns valid, renew & false
+		// valid (boolean) : the cookie has been unsigned successfully
+		// renew (boolean) : the cookie has been unsigned with an old secret
+		// value (string/null) : if the cookie is valid then returns string else null
+		let refreshToken = request.unsignCookie(refreshTokenCookie);
 
-	// Fastify-cookie has a function which can be used to sign & unsign tokens
-	// unsignCookie returns valid, renew & false
-	// valid (boolean) : the cookie has been unsigned successfully
-	// renew (boolean) : the cookie has been unsigned with an old secret
-	// value (string/null) : if the cookie is valid then returns string else null
-	let refreshToken = request.unsignCookie(refreshTokenCookie);
-
-	if (!refreshToken.valid) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token", {
-			clearCookie: true,
-		});
+		if (!refreshToken.valid) {
+			sendErrorResponse(reply, 400, "Invalid Refresh Token", {
+				clearCookie: true,
+			});
+		} else {
+			request.refreshToken = refreshToken.value;
+		}
 	} else {
-		request.refreshToken = refreshToken.value;
+		request.refreshToken = refreshTokenBody;
 	}
 };
 

@@ -11,7 +11,8 @@ const errors = responseErrors;
 const authenticationSchema = {
 	signup: {
 		description:
-			"Sign up to the service. Returns JWT token and sets Refresh token as cookie",
+			"Sign up to the service. Returns JWT token and sets Refresh token as cookie.\
+			(Sent in response if config - REFRESH_RESPONSE is enabled)",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -29,6 +30,9 @@ const authenticationSchema = {
 		response: {
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
+				refreshToken: {
+					type: "string",
+				},
 				...getEmailStatusResponse(),
 			}),
 			400: errors[404],
@@ -36,7 +40,9 @@ const authenticationSchema = {
 		},
 	},
 	signin: {
-		description: "Sign in .Returns JWT token and sets Refresh token as cookie",
+		description:
+			"Sign in .Returns JWT token and sets Refresh token as cookie.\
+			(Sent in response if config - REFRESH_RESPONSE is enabled)",
 		tags: ["Sign In and Sign Up"],
 		body: {
 			type: "object",
@@ -53,6 +59,7 @@ const authenticationSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
+				refreshToken: { type: "string" },
 				...getEmailStatusResponse(),
 			}),
 			400: errors[400],
@@ -107,6 +114,7 @@ const authenticationSchema = {
 			}),
 			400: errors[400],
 			500: errors[500],
+			403: errors[403],
 		},
 		security: jwtSecurity,
 	},
@@ -143,7 +151,8 @@ const authenticationSchema = {
 		response: {
 			302: {
 				type: "object",
-				description: `Redirects to ${configs.APP_RESET_PASSWORD_REDIRECT} .Success response will have success:true\
+				description: `Redirects to ${configs.APP_RESET_PASSWORD_REDIRECT} .\
+				Success response will have success:true\
 				and token value added as query parameters.\
 				Failure value will have success:false error & message`,
 			},
@@ -189,6 +198,7 @@ const authenticationSchema = {
 			}),
 			400: errors[400],
 			500: errors[500],
+			403: errors[403],
 		},
 	},
 	profile: {
@@ -205,12 +215,25 @@ const authenticationSchema = {
 			}),
 			400: errors[400],
 			500: errors[500],
+			403: errors[403],
 		},
 	},
 	refreshJWTToken: {
 		description:
-			"Get new JWT token from refresh token in the cookie. Sets new Refresh token in the cookie",
+			"Get new JWT token from refresh token in the cookie. Sets new Refresh token in the cookie.\
+			(Sent in response if config - REFRESH_RESPONSE is enabled)",
 		tags: ["Refresh Token"],
+		body: {
+			type: "object",
+			properties: {
+				refreshToken: {
+					type: "string",
+					description:
+						"Optional (if sent the route uses this instead\
+					 of the one in cookie)",
+				},
+			},
+		},
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
@@ -234,6 +257,7 @@ const authenticationSchema = {
 			),
 			400: errors[404],
 			500: errors[500],
+			403: errors[403],
 		},
 	},
 	revokeAll: {
@@ -249,6 +273,7 @@ const authenticationSchema = {
 			),
 			400: errors[404],
 			500: errors[500],
+			403: errors[403],
 		},
 	},
 };

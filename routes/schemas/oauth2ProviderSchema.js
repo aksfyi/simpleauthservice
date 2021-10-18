@@ -37,7 +37,8 @@ const oauthSchema = {
 	postOauthProviderLogin: {
 		description:
 			"Sign in using Oauth2 provider (callback URL handlers\
-            redirection to frontend)",
+            redirection to frontend). Sets Refresh token in cookie.\
+			(Sent in response if config - REFRESH_RESPONSE is enabled)",
 		tags: ["Oauth Provider Login"],
 		params: {
 			type: "object",
@@ -61,10 +62,12 @@ const oauthSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
+				refreshToken: { type: "string" },
 				...getEmailStatusResponse(),
 			}),
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
+				refreshToken: { type: "string" },
 				...getEmailStatusResponse(),
 			}),
 			400: responseErrors[400],
