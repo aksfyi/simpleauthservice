@@ -82,6 +82,14 @@ const signin = async (request, reply) => {
 		email,
 		isDeactivated: false,
 	}).select("+password");
+	if (!user.isEmailConfirmed) {
+		sendErrorResponse(
+			reply,
+			400,
+			"Please check your email and confirm your email address before logging in."
+		);
+	}
+
 	if (!user) {
 		sendErrorResponse(reply, 404, "User not found");
 	} else {
