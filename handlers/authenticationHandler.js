@@ -168,7 +168,7 @@ const requestConfirmationEmail = async (request, reply) => {
 			sendErrorResponse(reply, 500, emailStatus.message);
 		}
 
-		reply.send({
+		sendSuccessResponse(reply, {
 			statusCode: 200,
 			message: emailStatus.message,
 			emailSuccess: emailStatus.success,
@@ -208,7 +208,7 @@ const requestResetPasswordToken = async (request, reply) => {
 			sendErrorResponse(reply, 500, emailStatus.message);
 		}
 
-		reply.send({
+		sendSuccessResponse(reply, {
 			statusCode: 200,
 			message: emailStatus.message,
 			emailSuccess: emailStatus.success,
