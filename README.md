@@ -10,6 +10,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
   - [Setting up Locally](#setting-up-locally)
     - [Configuring Environment variables](#configuring-environment-variables)
     - [SMTP Configuration](#smtp-configuration)
+    - [Configuring Captcha verification](#configuring-captcha-verification)
     - [Oauth2 Provider Configurations](#oauth2-provider-configurations)
     - [Application configurations](#application-configurations)
   - [Swagger UI documentation](#swagger-ui-documentation)
@@ -20,6 +21,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
  - [x] Email verification
  - [x] Forgot Password
  - [x] Refresh Token Support
+ - [x] hCaptcha Verification Support
  - [x] Swagger UI for development environment
 
 ### Login with Oauth2 Providers
@@ -57,6 +59,12 @@ Configurations required to send email
 |  SMTP_PASSWORD|  
 | FROM_NAME | 
 | FROM_EMAIL | 
+
+### Configuring Captcha verification
+|Environment variable  | |
+|--|--|
+| HCAPTCHA_SECRET | Check https://docs.hcaptcha.com/ |
+| DISABLE_CAPTCHA | Setting it to 1 , disables captcha verification |
 
 ### Oauth2 Provider Configurations
 
