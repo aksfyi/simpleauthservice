@@ -24,6 +24,10 @@ const authenticationSchema = {
 					format: "email",
 				},
 				password: { type: "string", example: "asdhfgjkfhey%&6da" },
+				hToken: {
+					type: "string",
+					example: "10000000-aaaa-bbbb-cccc-000000000001",
+				},
 			},
 			required: ["name", "email", "password"],
 		},
@@ -53,6 +57,10 @@ const authenticationSchema = {
 					format: "email",
 				},
 				password: { type: "string", example: "asdhfgjkfhey%&6da" },
+				hToken: {
+					type: "string",
+					example: "10000000-aaaa-bbbb-cccc-000000000001",
+				},
 			},
 			required: ["email", "password"],
 		},
@@ -108,6 +116,21 @@ const authenticationSchema = {
 	confirmEmailPost: {
 		description: "Request for link to confirm email address",
 		tags: ["Confirm Email Address"],
+		body: {
+			type: "object",
+			properties: {
+				email: {
+					type: "string",
+					example: "example@example.com",
+					format: "email",
+				},
+				hToken: {
+					type: "string",
+					example: "10000000-aaaa-bbbb-cccc-000000000001",
+				},
+			},
+			required: ["email"],
+		},
 		response: {
 			200: getSuccessObject(200, true, "Confirmation email sent", {
 				...getEmailStatusResponse(),
@@ -116,7 +139,6 @@ const authenticationSchema = {
 			500: errors[500],
 			403: errors[403],
 		},
-		security: jwtSecurity,
 	},
 	resetPasswordPost: {
 		description: "Request link for resetting password",
@@ -124,7 +146,15 @@ const authenticationSchema = {
 		body: {
 			type: "object",
 			properties: {
-				email: { type: "string" },
+				email: {
+					type: "string",
+					example: "example@example.com",
+					format: "email",
+				},
+				hToken: {
+					type: "string",
+					example: "10000000-aaaa-bbbb-cccc-000000000001",
+				},
 			},
 			required: ["email"],
 		},

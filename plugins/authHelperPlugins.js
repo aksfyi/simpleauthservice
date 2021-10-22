@@ -1,20 +1,23 @@
 const { sendErrorResponse } = require("../handlers/responseHelpers");
 const User = require("../models/user");
 const { configs } = require("../configs");
+const { default: axios } = require("axios");
 
 /**
  * This should be used only after the JWT tokens are verified
  * Can be in the array of preHandlers after verifyAuth
  */
 const checkDeactivated = (request, reply, done) => {
-	if (request.user.isDeactivated) {
+	const user = request.user || request.userModel;
+	if (user.isDeactivated) {
 		sendErrorResponse(reply, 400, "User account is deactivated");
 	}
 	done();
 };
 
 const checkEmailConfirmed = (request, reply, done) => {
-	if (!request.user.isEmailConfirmed) {
+	const user = request.user || request.userModel;
+	if (!user.isEmailConfirmed) {
 		sendErrorResponse(
 			reply,
 			400,
@@ -24,25 +27,34 @@ const checkEmailConfirmed = (request, reply, done) => {
 	done();
 };
 
-const attachUser = (isDeactivated, isEmailConfirmed) => {
+const attachUser = (byEmail) => {
 	return async (request, reply) => {
-		const user = await User.findOne({
-			email: request.user.email,
-			isDeactivated: isDeactivated,
-			isEmailConfirmed: isEmailConfirmed,
-		});
+		if (!byEmail) {
+			user = await User.findOne({
+				uid: request.user.uid,
+			});
+		} else {
+			user = await User.findOne({
+				email: request.body.email,
+			});
+		}
 		must(reply, user, "User not found");
 		request.userModel = user;
 	};
 };
 
-const attachUserWithPassword = (isDeactivated, isEmailConfirmed) => {
+const attachUserWithPassword = (byEmail) => {
 	return async (request, reply) => {
-		const user = await User.findOne({
-			uid: request.user.uid,
-			isDeactivated: isDeactivated,
-			isEmailConfirmed: isEmailConfirmed,
-		}).select("+password");
+		let user;
+		if (!byEmail) {
+			user = await User.findOne({
+				uid: request.user.uid,
+			}).select("+password");
+		} else {
+			user = await User.findOne({
+				email: request.body.email,
+			}).select("+password");
+		}
 		must(reply, user, "User not found");
 		request.userModel = user;
 	};
@@ -94,6 +106,33 @@ const refreshTokenValidation = async (request, reply) => {
 	}
 };
 
+const hCaptchaVerification = async (request, reply) => {
+	if (!configs.DISABLE_CAPTCHA) {
+		if (!configs.HCAPTCHA_SECRET) {
+			sendErrorResponse(
+				reply,
+				500,
+				"Robot verification not configured in the server (hCaptcha)"
+			);
+		}
+		const hToken = request.body.hToken;
+		must(reply, hToken, "Robot verification token missing");
+		const tokenVerify = await axios({
+			method: "POST",
+			url: configs.HCAPTCHA_VERIFY_URL,
+			headers: { "Content-Type": "application/x-www-form-urlencoded" },
+			data: `response=${encodeURIComponent(hToken)}&secret=${encodeURIComponent(
+				configs.HCAPTCHA_SECRET
+			)}`,
+		});
+
+		console.log(tokenVerify.data);
+		if (!tokenVerify.data.success) {
+			sendErrorResponse(reply, 400, "Robot verification unsuccessful");
+		}
+	}
+};
+
 const must = (reply, parameter, message) => {
 	if (!parameter) {
 		sendErrorResponse(reply, 400, message);
@@ -108,4 +147,5 @@ module.exports = {
 	checkPasswordLength,
 	checkMailingDisabled,
 	refreshTokenValidation,
+	hCaptchaVerification,
 };

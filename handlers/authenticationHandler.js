@@ -77,43 +77,30 @@ const registerUser = async (request, reply) => {
 //			 response with JWT and Refresh token
 // @access 	 Public
 const signin = async (request, reply) => {
-	const { email, password } = request.body;
-	const user = await User.findOne({
-		email,
-		isDeactivated: false,
-	}).select("+password");
-	if (!user.isEmailConfirmed) {
-		sendErrorResponse(
+	const { password } = request.body;
+	const user = request.userModel;
+	console.log(user);
+
+	if (await user.matchPasswd(password)) {
+		const refreshToken = await getRefreshToken(user, request.ip);
+
+		const emailStatus = await sendNewLoginEmail(user, request);
+
+		sendSuccessResponse(
 			reply,
-			400,
-			"Please check your email and confirm your email address before logging in."
+			{
+				statusCode: 200,
+				message: "Signed in",
+				token: user.getJWT(),
+				emailSuccess: emailStatus.success,
+				emailMessage: emailStatus.message,
+			},
+			{
+				refreshToken,
+			}
 		);
-	}
-
-	if (!user) {
-		sendErrorResponse(reply, 404, "User not found");
 	} else {
-		if (await user.matchPasswd(password)) {
-			const refreshToken = await getRefreshToken(user, request.ip);
-
-			const emailStatus = await sendNewLoginEmail(user, request);
-
-			sendSuccessResponse(
-				reply,
-				{
-					statusCode: 200,
-					message: "Signed in",
-					token: user.getJWT(),
-					emailSuccess: emailStatus.success,
-					emailMessage: emailStatus.message,
-				},
-				{
-					refreshToken,
-				}
-			);
-		} else {
-			sendErrorResponse(reply, 400, "Password Does not match");
-		}
+		sendErrorResponse(reply, 400, "Password Does not match");
 	}
 };
 
@@ -144,77 +131,69 @@ const confirmEmail = async (request, reply) => {
 
 // @route	POST /api/v1/auth/confirmEmail
 // @desc	Request to send confirmation email again
-// @access 	Private (JWT TOKEN REQUIRED)
+// @access 	Public
 const requestConfirmationEmail = async (request, reply) => {
-	if (request.user.isEmailConfirmed) {
+	const user = request.userModel;
+	if (user.isEmailConfirmed) {
 		sendErrorResponse(reply, 400, "Email already confirmed");
 	}
-	const user = request.userModel;
-	if (!user) {
-		sendErrorResponse(reply, 400, "Email confirmed or user does not exist");
-	} else if (!user.isConfirmEmailTokenExpired()) {
-		sendErrorResponse(reply, 400, "Please check your email, try again later");
-	} else {
-		const confirmationToken = user.getEmailConfirmationToken();
-		user.save({ validateBeforeSave: false });
-
-		const emailStatus = await confirmationEmailHelper(
-			user,
-			request,
-			confirmationToken
+	if (!user.isConfirmEmailTokenExpired()) {
+		sendErrorResponse(
+			reply,
+			400,
+			"Confirmation email was already sent to your email. Check Spam/Promotions folder.\
+			 Please request again after some time."
 		);
-
-		if (!emailStatus.success) {
-			sendErrorResponse(reply, 500, emailStatus.message);
-		}
-
-		sendSuccessResponse(reply, {
-			statusCode: 200,
-			message: emailStatus.message,
-			emailSuccess: emailStatus.success,
-			emailMessage: emailStatus.message,
-		});
 	}
+	const confirmationToken = user.getEmailConfirmationToken();
+	user.save({ validateBeforeSave: false });
+
+	const emailStatus = await confirmationEmailHelper(
+		user,
+		request,
+		confirmationToken
+	);
+
+	if (!emailStatus.success) {
+		sendErrorResponse(reply, 500, emailStatus.message);
+	}
+
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: emailStatus.message,
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
+	});
 };
 
 // @route 	 POST /api/v1/auth/resetPassword
 // @desc	 Request to send reset password email
 // @access	 Public
 const requestResetPasswordToken = async (request, reply) => {
-	const user = await User.findOne({
-		email: request.body.email,
-		isDeactivated: false,
-		isEmailConfirmed: true,
-	});
-	if (!user) {
-		sendErrorResponse(
-			reply,
-			404,
-			"User does not exist or email is not verified yet"
-		);
-	} else if (!user.isPwResetTokenExpired()) {
+	const user = request.userModel;
+
+	if (!user.isPwResetTokenExpired()) {
 		sendErrorResponse(reply, 400, "Please check your email, try again later");
-	} else {
-		const pwResetToken = user.getPwResetToken();
-		await user.save({ validateBeforeSave: false });
-
-		const emailStatus = await passwordResetEmailHelper(
-			user,
-			request,
-			pwResetToken
-		);
-
-		if (!emailStatus.success) {
-			sendErrorResponse(reply, 500, emailStatus.message);
-		}
-
-		sendSuccessResponse(reply, {
-			statusCode: 200,
-			message: emailStatus.message,
-			emailSuccess: emailStatus.success,
-			emailMessage: emailStatus.message,
-		});
 	}
+	const pwResetToken = user.getPwResetToken();
+	await user.save({ validateBeforeSave: false });
+
+	const emailStatus = await passwordResetEmailHelper(
+		user,
+		request,
+		pwResetToken
+	);
+
+	if (!emailStatus.success) {
+		sendErrorResponse(reply, 500, emailStatus.message);
+	}
+
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: emailStatus.message,
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
+	});
 };
 
 // @route 	GET /api/v1/auth/resetPassword

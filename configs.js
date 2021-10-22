@@ -26,6 +26,13 @@ const configs = {
 	FROM_EMAIL: process.env.FROM_EMAIL,
 	DISABLE_MAIL: process.env.DISABLE_MAIL === "1" ? true : false,
 
+	HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET,
+	DISABLE_CAPTCHA:
+		process.env.DISABLE_MAIL === "1" || !process.env.HCAPTCHA_SECRET
+			? true
+			: false,
+	HCAPTCHA_VERIFY_URL: "https://hcaptcha.com/siteverify",
+
 	IS_SMTP_CONFIGURED: false,
 	APP_NAME: process.env.APP_NAME || "",
 	APP_DOMAIN: process.env.APP_DOMAIN || "",
