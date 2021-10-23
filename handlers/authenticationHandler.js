@@ -300,14 +300,10 @@ const getJWTFromRefresh = async (request, reply) => {
 	// valid (boolean) : the cookie has been unsigned successfully
 	// renew (boolean) : the cookie has been unsigned with an old secret
 	// value (string/null) : if the cookie is valid then returns string else null
-	let refreshToken = request.unsignCookie(request.cookies.refreshToken);
-
-	if (!refreshToken.valid) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
-	}
+	let refreshToken = request.refreshToken;
 
 	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken.value).digest("hex"),
+		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
 		isRevoked: false,
 	});
 	if (!rft) {
