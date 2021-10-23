@@ -81,7 +81,7 @@ const refreshTokenValidation = async (request, reply) => {
 	// (request.refreshToken) else check cookie and validate the token in the cookie
 	// then attach it to request body (request.refreshToken) if the cookie is
 	// valid
-	let refreshTokenBody = request.body.refreshToken;
+	let refreshTokenBody = request.body ? request.body.refreshToken : false;
 	if (!refreshTokenBody) {
 		const refreshTokenCookie = request.cookies.refreshToken;
 		if (!refreshTokenCookie) {

@@ -79,7 +79,6 @@ const registerUser = async (request, reply) => {
 const signin = async (request, reply) => {
 	const { password } = request.body;
 	const user = request.userModel;
-	console.log(user);
 
 	if (await user.matchPasswd(password)) {
 		const refreshToken = await getRefreshToken(user, request.ip);
