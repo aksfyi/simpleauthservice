@@ -120,6 +120,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		url: "/profile",
 		preHandler: [
 			verifyAuth(["admin", "user"]),
+			attachUser(false),
 			checkEmailConfirmed,
 			checkDeactivated,
 		],

@@ -283,7 +283,11 @@ const getProfile = async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "User Found",
-		...user,
+		name: user.name,
+		email: user.email,
+		role: user.role,
+		isEmailConfirmed: user.isEmailConfirmed,
+		isDeactivated: user.isDeactivated,
 	});
 };
 
