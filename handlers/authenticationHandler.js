@@ -49,7 +49,7 @@ const registerUser = async (request, reply) => {
 	const confirmationToken = user.getEmailConfirmationToken();
 	user.save({ validateBeforeSave: true });
 
-	const refreshToken = await getRefreshToken(user, request.ip);
+	const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 	const emailStatus = await confirmationEmailHelper(
 		user,
@@ -81,7 +81,7 @@ const signin = async (request, reply) => {
 	const user = request.userModel;
 
 	if (await user.matchPasswd(password)) {
-		const refreshToken = await getRefreshToken(user, request.ip);
+		const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 		const emailStatus = await sendNewLoginEmail(user, request);
 
@@ -218,7 +218,7 @@ const resetPasswordFromToken = async (request, reply) => {
 			"Password and confirmed password are different"
 		);
 	} else {
-		await revokeAllRfTokenByUser(user, request.ip);
+		await revokeAllRfTokenByUser(user, request.ipAddress);
 
 		password = await hashPasswd(password);
 		user.password = password;
@@ -258,7 +258,7 @@ const updatePassword = async (request, reply) => {
 		);
 	}
 
-	await revokeAllRfTokenByUser(user, request.ip);
+	await revokeAllRfTokenByUser(user, request.ipAddress);
 
 	user.password = await hashPasswd(password);
 
@@ -323,9 +323,9 @@ const getJWTFromRefresh = async (request, reply) => {
 	}
 
 	const jwtToken = user.getJWT();
-	rft.revoke(request.ip);
+	rft.revoke(request.ipAddress);
 	rft.save();
-	const newRefreshToken = await getRefreshToken(user, request.ip);
+	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
 
 	sendSuccessResponse(
 		reply,
@@ -378,7 +378,7 @@ const revokeRefreshToken = async (request, reply) => {
 			clearCookie: true,
 		});
 	}
-	rft.revoke(request.ip);
+	rft.revoke(request.ipAddress);
 	rft.save();
 	sendSuccessResponse(
 		reply,

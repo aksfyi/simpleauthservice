@@ -37,7 +37,7 @@ if (configs.ALLOW_CORS_ORIGIN) {
 
 // Use real IP address if x-real-ip header is present
 fastify.addHook("onRequest", (request, reply, done) => {
-	request.ip = request.headers["x-real-ip"] || request.ip;
+	request.ipAddress = request.headers["x-real-ip"] || request.ip;
 	done();
 });
 

@@ -105,7 +105,7 @@ const passwordChangedEmailAlert = async (user, request) => {
 				username: user.name,
 				appName: configs.APP_NAME,
 				appDomain: configs.appDomain,
-				ip: request.ip,
+				ip: request.ipAddress,
 				ua: request.headers["user-agent"],
 			},
 			passwordChangedTemplate
@@ -125,7 +125,7 @@ const sendNewLoginEmail = async (user, request) => {
 					username: user.name,
 					appName: configs.APP_NAME,
 					appDomain: configs.APP_DOMAIN,
-					ip: request.ip,
+					ip: request.ipAddress,
 					ua: request.headers["user-agent"],
 				},
 				newLoginTemplate
