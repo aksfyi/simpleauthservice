@@ -32,6 +32,7 @@ if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 if (configs.ALLOW_CORS_ORIGIN) {
 	fastify.register(require("fastify-cors"), {
 		origin: configs.ALLOW_CORS_ORIGIN.split(","),
+		credentials: true,
 	});
 }
 

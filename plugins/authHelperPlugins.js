@@ -125,8 +125,6 @@ const hCaptchaVerification = async (request, reply) => {
 				configs.HCAPTCHA_SECRET
 			)}`,
 		});
-
-		console.log(tokenVerify.data);
 		if (!tokenVerify.data.success) {
 			sendErrorResponse(reply, 400, "Robot verification unsuccessful");
 		}
