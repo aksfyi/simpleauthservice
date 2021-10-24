@@ -15,7 +15,7 @@ const configs = {
 		process.env.AUTH_SERVICE_HOST ||
 		`http://localhost:${process.env.PORT || 5000}`,
 	ALLOW_CORS_ORIGIN: process.env.ALLOW_CORS_ORIGIN,
-	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL,
+	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL === "1" ? true : false,
 	HTTP_PROTOCOL: process.env.HTTP_PROTOCOL,
 	REFRESH_RESPONSE: process.env.REFRESH_RESPONSE === "1" ? true : false,
 	SMTP_HOST: process.env.SMTP_HOST,
