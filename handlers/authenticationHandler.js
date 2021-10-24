@@ -25,6 +25,15 @@ const {
 // @access	Public
 const registerUser = async (request, reply) => {
 	let { name, email, password } = request.body;
+
+	// Check if there is an account with the same email
+	const userExists = await User.findOne({
+		email: email,
+	});
+	if (userExists) {
+		sendErrorResponse(reply, 400, "Duplicate field value entered");
+	}
+
 	let provider = "email";
 	password = await hashPasswd(password);
 	let role = "user";
