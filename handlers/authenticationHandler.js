@@ -373,7 +373,7 @@ const revokeRefreshToken = async (request, reply) => {
 		sendInvalidToken();
 	}
 
-	if (user.email !== request.user.email) {
+	if (user.uid !== request.user.uid) {
 		// Check whether the refresh token was created by the same user
 		sendInvalidToken();
 	}
