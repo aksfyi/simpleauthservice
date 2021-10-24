@@ -130,8 +130,8 @@ userSchema.methods.getEmailConfirmationToken = function () {
 		.update(confirmationToken)
 		.digest("hex");
 
-	// Set token expiration to 6 hours from now
-	this.confirmEmailTokenExpire = Date.now() + 6 * 60 * 60 * 1000;
+	// Set token expiration to 1 hour from now
+	this.confirmEmailTokenExpire = Date.now() + 60 * 60 * 1000;
 
 	return confirmationToken;
 };

@@ -149,7 +149,7 @@ const requestConfirmationEmail = async (request, reply) => {
 		sendErrorResponse(
 			reply,
 			400,
-			"Confirmation email was already sent to your email. Check Spam/Promotions folder.\
+			"Confirmation email was recently sent to your email. Check Spam/Promotions folder.\
 			 Please request again after some time."
 		);
 	}
