@@ -28,7 +28,7 @@ const configs = {
 
 	HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET,
 	DISABLE_CAPTCHA:
-		process.env.DISABLE_MAIL === "1" || !process.env.HCAPTCHA_SECRET
+		process.env.DISABLE_CAPTCHA === "1" || !process.env.HCAPTCHA_SECRET
 			? true
 			: false,
 	HCAPTCHA_VERIFY_URL: "https://hcaptcha.com/siteverify",
