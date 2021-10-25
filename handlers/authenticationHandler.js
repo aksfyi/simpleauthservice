@@ -292,7 +292,7 @@ const getProfile = async (request, reply) => {
 		statusCode: 200,
 		message: "User Found",
 		name: user.name,
-		email: user.email,
+		email: request.userModel.email,
 		role: user.role,
 		isEmailConfirmed: user.isEmailConfirmed,
 		isDeactivated: user.isDeactivated,
