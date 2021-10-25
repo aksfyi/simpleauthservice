@@ -8,6 +8,7 @@ const { authenticationRoutes } = require("./routes/authentication");
 const { oauth2Routes } = require("./routes/oauth2Provider");
 const { getSwaggerOptions } = require("./utils/utils");
 const helmet = require("fastify-helmet");
+const { adminRoutes } = require("./routes/admin");
 
 // fastify-helmet adds various HTTP headers for security
 if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
@@ -30,9 +31,16 @@ if (configs.ENVIRONMENT.toLowerCase() === keywords.DEVELOPMENT_ENV) {
 // If cors is enabled then register CORS origin
 if (configs.ALLOW_CORS_ORIGIN) {
 	fastify.register(require("fastify-cors"), {
-		origin: configs.ALLOW_CORS_ORIGIN,
+		origin: configs.ALLOW_CORS_ORIGIN.split(","),
+		credentials: true,
 	});
 }
+
+// Use real IP address if x-real-ip header is present
+fastify.addHook("onRequest", (request, reply, done) => {
+	request.ipAddress = request.headers["x-real-ip"] || request.ip;
+	done();
+});
 
 // Set error Handler
 fastify.setErrorHandler(getErrorHandler(fastify));
@@ -43,12 +51,14 @@ fastify.register(authenticationRoutes, { prefix: "api/v1/auth" });
 // Register oauth2 routes
 fastify.register(oauth2Routes, { prefix: "api/v1/auth/oauth" });
 
+// Register admin routes
+fastify.register(adminRoutes, { prefix: "api/v1/admin" });
+
 // Auth Service health check
 fastify.get("/", async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Application is running",
-		...checkConfigs,
 	});
 });
 

@@ -22,6 +22,7 @@ const {
 	checkPasswordLength,
 	checkMailingDisabled,
 	refreshTokenValidation,
+	hCaptchaVerification,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
@@ -32,12 +33,19 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/signup",
 		schema: authenticationSchema.signup,
+		preHandler: hCaptchaVerification,
 		handler: registerUser,
 	});
 
 	fastify.route({
 		method: "POST",
 		url: "/signin",
+		preHandler: [
+			hCaptchaVerification,
+			attachUserWithPassword(true),
+			checkDeactivated,
+			checkEmailConfirmed,
+		],
 		schema: authenticationSchema.signin,
 		handler: signin,
 	});
@@ -51,16 +59,16 @@ const authenticationRoutes = (fastify, _, done) => {
 		handler: confirmEmailTokenRedirect,
 	});
 
-	// Route to request confirmation email when the user is logged in
+	// Route to request to resend confirmation email
 	fastify.route({
 		method: "POST",
 		url: "/confirmEmail",
 		schema: authenticationSchema.confirmEmailPost,
 		preHandler: [
-			verifyAuth(["admin", "user"], false),
+			hCaptchaVerification,
 			checkMailingDisabled,
+			attachUser(true),
 			checkDeactivated,
-			attachUser(false, false),
 		],
 		handler: requestConfirmationEmail,
 	});
@@ -88,7 +96,12 @@ const authenticationRoutes = (fastify, _, done) => {
 		method: "POST",
 		url: "/resetPassword",
 		schema: authenticationSchema.resetPasswordPost,
-		preHandler: checkMailingDisabled,
+		preHandler: [
+			hCaptchaVerification,
+			checkMailingDisabled,
+			attachUser(true),
+			checkDeactivated,
+		],
 		handler: requestResetPasswordToken,
 	});
 
@@ -105,7 +118,12 @@ const authenticationRoutes = (fastify, _, done) => {
 	fastify.route({
 		method: "GET",
 		url: "/profile",
-		preHandler: [verifyAuth(["admin", "user"], false), checkDeactivated],
+		preHandler: [
+			verifyAuth(["admin", "user"]),
+			attachUser(false),
+			checkEmailConfirmed,
+			checkDeactivated,
+		],
 		schema: authenticationSchema.profile,
 		handler: getProfile,
 	});
@@ -118,7 +136,7 @@ const authenticationRoutes = (fastify, _, done) => {
 			verifyAuth(["admin", "user"], false),
 			checkDeactivated,
 			checkEmailConfirmed,
-			attachUserWithPassword(false, true),
+			attachUserWithPassword(false),
 			checkPasswordLength,
 		],
 		schema: authenticationSchema.updatePassword,
@@ -139,7 +157,7 @@ const authenticationRoutes = (fastify, _, done) => {
 		url: "/refresh/revoke",
 		schema: authenticationSchema.revokeRefreshToken,
 		preHandler: [
-			verifyAuth(["admin", "user"], false),
+			verifyAuth(["admin", "user"]),
 			checkDeactivated,
 			refreshTokenValidation,
 		],
@@ -152,9 +170,9 @@ const authenticationRoutes = (fastify, _, done) => {
 		url: "/revokeAll",
 		schema: authenticationSchema.revokeAll,
 		preHandler: [
-			verifyAuth(["admin", "user"], false),
+			verifyAuth(["admin", "user"]),
 			checkDeactivated,
-			attachUser(false, false),
+			attachUser(false),
 		],
 		handler: revokeAllRefreshTokens,
 	});

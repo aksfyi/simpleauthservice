@@ -84,7 +84,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 		isDeactivated: false,
 	});
 	if (user) {
-		const refreshToken = await getRefreshToken(user, request.ip);
+		const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 		const emailStatus = await sendNewLoginEmail(user, request);
 
@@ -119,7 +119,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 				confirmationToken
 			);
 		}
-		const refreshToken = await getRefreshToken(user, request.ip);
+		const refreshToken = await getRefreshToken(user, request.ipAddress);
 		sendSuccessResponse(
 			reply,
 			{

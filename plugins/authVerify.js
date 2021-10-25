@@ -6,10 +6,9 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
  * Plugin to verify if the user is authenticated/authorized to access
  * route.
  * @param {Array} roles Example ['user'] , ['admin'] , ['user','admin']
- * @param {Boolean} emailConfRequired
  * @returns
  */
-const verifyAuth = (roles = [], emailConfRequired) => {
+const verifyAuth = (roles = []) => {
 	return function (request, reply, done) {
 		// Get the authorization header
 		const authorizationHeader = request.headers["authorization"];
@@ -43,15 +42,6 @@ const verifyAuth = (roles = [], emailConfRequired) => {
 					403,
 					"You have no permission to view this page"
 				);
-			}
-			if (emailConfRequired) {
-				if (!decoded.isEmailConfirmed) {
-					sendErrorResponse(
-						reply,
-						403,
-						"Confirm your email address to view this page"
-					);
-				}
 			}
 			request.user = decoded;
 			done();

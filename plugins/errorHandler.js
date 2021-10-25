@@ -9,6 +9,10 @@ const getErrorHandler = (fastify) => {
 			fastify.log.error(err.message);
 		}
 
+		if (err.request || err.response) {
+			axiosErrorHandler(reply, err);
+		}
+
 		//Default Status code and error message
 		let statusCode = 500;
 		let message = "Error in the server";
@@ -52,6 +56,30 @@ const getErrorHandler = (fastify) => {
 
 		sendErrorResponse(reply, statusCode, message);
 	};
+};
+
+// Function used to handle axios errors
+const axiosErrorHandler = (reply, err) => {
+	switch (err.config.url) {
+		case configs.HCAPTCHA_VERIFY_URL:
+			sendErrorResponse(reply, 400, "Robot verification unsuccessful");
+			break;
+		case configs.GITHUB_CONFIGS.ACCESS_TOKEN ||
+			configs.GITHUB_CONFIGS.AUTHORIZE:
+			sendErrorResponse(reply, 400, "Could not Login with Github");
+			break;
+		case configs.GOOGLE_CONFIGS.ACCESS_TOKEN ||
+			configs.GOOGLE_CONFIGS.AUTHORIZE:
+			sendErrorResponse(reply, 400, "Could not Login with Google");
+			break;
+		default:
+			sendErrorResponse(
+				reply,
+				500,
+				"Could not send axios request. Internal Server Error"
+			);
+			break;
+	}
 };
 
 module.exports = {

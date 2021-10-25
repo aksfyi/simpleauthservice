@@ -47,7 +47,6 @@ const tokenCheck = (type, shouldRedirect) => {
 			user = await User.findOne({
 				pwResetToken: hashedToken,
 				isDeactivated: false,
-				isEmailConfirmed: true,
 			});
 		} else if (type === "confirmEmail") {
 			user = await User.findOne({

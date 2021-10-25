@@ -25,6 +25,15 @@ const {
 // @access	Public
 const registerUser = async (request, reply) => {
 	let { name, email, password } = request.body;
+
+	// Check if there is an account with the same email
+	const userExists = await User.findOne({
+		email: email,
+	});
+	if (userExists) {
+		sendErrorResponse(reply, 400, "Duplicate field value entered");
+	}
+
 	let provider = "email";
 	password = await hashPasswd(password);
 	let role = "user";
@@ -49,7 +58,7 @@ const registerUser = async (request, reply) => {
 	const confirmationToken = user.getEmailConfirmationToken();
 	user.save({ validateBeforeSave: true });
 
-	const refreshToken = await getRefreshToken(user, request.ip);
+	const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 	const emailStatus = await confirmationEmailHelper(
 		user,
@@ -77,35 +86,29 @@ const registerUser = async (request, reply) => {
 //			 response with JWT and Refresh token
 // @access 	 Public
 const signin = async (request, reply) => {
-	const { email, password } = request.body;
-	const user = await User.findOne({
-		email,
-		isDeactivated: false,
-	}).select("+password");
-	if (!user) {
-		sendErrorResponse(reply, 404, "User not found");
+	const { password } = request.body;
+	const user = request.userModel;
+
+	if (await user.matchPasswd(password)) {
+		const refreshToken = await getRefreshToken(user, request.ipAddress);
+
+		const emailStatus = await sendNewLoginEmail(user, request);
+
+		sendSuccessResponse(
+			reply,
+			{
+				statusCode: 200,
+				message: "Signed in",
+				token: user.getJWT(),
+				emailSuccess: emailStatus.success,
+				emailMessage: emailStatus.message,
+			},
+			{
+				refreshToken,
+			}
+		);
 	} else {
-		if (await user.matchPasswd(password)) {
-			const refreshToken = await getRefreshToken(user, request.ip);
-
-			const emailStatus = await sendNewLoginEmail(user, request);
-
-			sendSuccessResponse(
-				reply,
-				{
-					statusCode: 200,
-					message: "Signed in",
-					token: user.getJWT(),
-					emailSuccess: emailStatus.success,
-					emailMessage: emailStatus.message,
-				},
-				{
-					refreshToken,
-				}
-			);
-		} else {
-			sendErrorResponse(reply, 400, "Password Does not match");
-		}
+		sendErrorResponse(reply, 400, "Password Does not match");
 	}
 };
 
@@ -136,77 +139,69 @@ const confirmEmail = async (request, reply) => {
 
 // @route	POST /api/v1/auth/confirmEmail
 // @desc	Request to send confirmation email again
-// @access 	Private (JWT TOKEN REQUIRED)
+// @access 	Public
 const requestConfirmationEmail = async (request, reply) => {
-	if (request.user.isEmailConfirmed) {
+	const user = request.userModel;
+	if (user.isEmailConfirmed) {
 		sendErrorResponse(reply, 400, "Email already confirmed");
 	}
-	const user = request.userModel;
-	if (!user) {
-		sendErrorResponse(reply, 400, "Email confirmed or user does not exist");
-	} else if (!user.isConfirmEmailTokenExpired()) {
-		sendErrorResponse(reply, 400, "Please check your email, try again later");
-	} else {
-		const confirmationToken = user.getEmailConfirmationToken();
-		user.save({ validateBeforeSave: false });
-
-		const emailStatus = await confirmationEmailHelper(
-			user,
-			request,
-			confirmationToken
+	if (!user.isConfirmEmailTokenExpired()) {
+		sendErrorResponse(
+			reply,
+			400,
+			"Confirmation email was recently sent to your email. Check Spam/Promotions folder.\
+			 Please request again after some time."
 		);
-
-		if (!emailStatus.success) {
-			sendErrorResponse(reply, 500, emailStatus.message);
-		}
-
-		reply.send({
-			statusCode: 200,
-			message: emailStatus.message,
-			emailSuccess: emailStatus.success,
-			emailMessage: emailStatus.message,
-		});
 	}
+	const confirmationToken = user.getEmailConfirmationToken();
+	user.save({ validateBeforeSave: false });
+
+	const emailStatus = await confirmationEmailHelper(
+		user,
+		request,
+		confirmationToken
+	);
+
+	if (!emailStatus.success) {
+		sendErrorResponse(reply, 500, emailStatus.message);
+	}
+
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: emailStatus.message,
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
+	});
 };
 
 // @route 	 POST /api/v1/auth/resetPassword
 // @desc	 Request to send reset password email
 // @access	 Public
 const requestResetPasswordToken = async (request, reply) => {
-	const user = await User.findOne({
-		email: request.body.email,
-		isDeactivated: false,
-		isEmailConfirmed: true,
-	});
-	if (!user) {
-		sendErrorResponse(
-			reply,
-			404,
-			"User does not exist or email is not verified yet"
-		);
-	} else if (!user.isPwResetTokenExpired()) {
+	const user = request.userModel;
+
+	if (!user.isPwResetTokenExpired()) {
 		sendErrorResponse(reply, 400, "Please check your email, try again later");
-	} else {
-		const pwResetToken = user.getPwResetToken();
-		await user.save({ validateBeforeSave: false });
-
-		const emailStatus = await passwordResetEmailHelper(
-			user,
-			request,
-			pwResetToken
-		);
-
-		if (!emailStatus.success) {
-			sendErrorResponse(reply, 500, emailStatus.message);
-		}
-
-		reply.send({
-			statusCode: 200,
-			message: emailStatus.message,
-			emailSuccess: emailStatus.success,
-			emailMessage: emailStatus.message,
-		});
 	}
+	const pwResetToken = user.getPwResetToken();
+	await user.save({ validateBeforeSave: false });
+
+	const emailStatus = await passwordResetEmailHelper(
+		user,
+		request,
+		pwResetToken
+	);
+
+	if (!emailStatus.success) {
+		sendErrorResponse(reply, 500, emailStatus.message);
+	}
+
+	sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: emailStatus.message,
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
+	});
 };
 
 // @route 	GET /api/v1/auth/resetPassword
@@ -232,7 +227,7 @@ const resetPasswordFromToken = async (request, reply) => {
 			"Password and confirmed password are different"
 		);
 	} else {
-		await revokeAllRfTokenByUser(user, request.ip);
+		await revokeAllRfTokenByUser(user, request.ipAddress);
 
 		password = await hashPasswd(password);
 		user.password = password;
@@ -272,7 +267,7 @@ const updatePassword = async (request, reply) => {
 		);
 	}
 
-	await revokeAllRfTokenByUser(user, request.ip);
+	await revokeAllRfTokenByUser(user, request.ipAddress);
 
 	user.password = await hashPasswd(password);
 
@@ -296,7 +291,11 @@ const getProfile = async (request, reply) => {
 	sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "User Found",
-		...user,
+		name: user.name,
+		email: request.userModel.email,
+		role: user.role,
+		isEmailConfirmed: user.isEmailConfirmed,
+		isDeactivated: user.isDeactivated,
 	});
 };
 
@@ -310,14 +309,10 @@ const getJWTFromRefresh = async (request, reply) => {
 	// valid (boolean) : the cookie has been unsigned successfully
 	// renew (boolean) : the cookie has been unsigned with an old secret
 	// value (string/null) : if the cookie is valid then returns string else null
-	let refreshToken = request.unsignCookie(request.cookies.refreshToken);
-
-	if (!refreshToken.valid) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
-	}
+	let refreshToken = request.refreshToken;
 
 	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken.value).digest("hex"),
+		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
 		isRevoked: false,
 	});
 	if (!rft) {
@@ -333,9 +328,9 @@ const getJWTFromRefresh = async (request, reply) => {
 	}
 
 	const jwtToken = user.getJWT();
-	rft.revoke(request.ip);
+	rft.revoke(request.ipAddress);
 	rft.save();
-	const newRefreshToken = await getRefreshToken(user, request.ip);
+	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
 
 	sendSuccessResponse(
 		reply,
@@ -378,7 +373,7 @@ const revokeRefreshToken = async (request, reply) => {
 		sendInvalidToken();
 	}
 
-	if (user.email !== request.user.email) {
+	if (user.uid !== request.user.uid) {
 		// Check whether the refresh token was created by the same user
 		sendInvalidToken();
 	}
@@ -388,7 +383,7 @@ const revokeRefreshToken = async (request, reply) => {
 			clearCookie: true,
 		});
 	}
-	rft.revoke(request.ip);
+	rft.revoke(request.ipAddress);
 	rft.save();
 	sendSuccessResponse(
 		reply,

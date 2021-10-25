@@ -15,9 +15,9 @@ const configs = {
 		process.env.AUTH_SERVICE_HOST ||
 		`http://localhost:${process.env.PORT || 5000}`,
 	ALLOW_CORS_ORIGIN: process.env.ALLOW_CORS_ORIGIN,
-	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL,
+	SEND_NEW_LOGIN_EMAIL: process.env.SEND_NEW_LOGIN_EMAIL === "1" ? true : false,
 	HTTP_PROTOCOL: process.env.HTTP_PROTOCOL,
-
+	REFRESH_RESPONSE: process.env.REFRESH_RESPONSE === "1" ? true : false,
 	SMTP_HOST: process.env.SMTP_HOST,
 	SMTP_PORT: process.env.SMTP_PORT,
 	SMTP_EMAIL: process.env.SMTP_EMAIL,
@@ -25,6 +25,13 @@ const configs = {
 	FROM_NAME: process.env.FROM_NAME,
 	FROM_EMAIL: process.env.FROM_EMAIL,
 	DISABLE_MAIL: process.env.DISABLE_MAIL === "1" ? true : false,
+
+	HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET,
+	DISABLE_CAPTCHA:
+		process.env.DISABLE_CAPTCHA === "1" || !process.env.HCAPTCHA_SECRET
+			? true
+			: false,
+	HCAPTCHA_VERIFY_URL: "https://hcaptcha.com/siteverify",
 
 	IS_SMTP_CONFIGURED: false,
 	APP_NAME: process.env.APP_NAME || "",
