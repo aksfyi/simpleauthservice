@@ -84,21 +84,30 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 		isDeactivated: false,
 	});
 	if (user) {
-		const refreshToken = await getRefreshToken(user, request.ipAddress);
+		if (configs.PROVIDER_LOGIN_EMAIL_CONFIRMATION_REQUIRED) {
+			if (!user.isEmailConfirmed) {
+				sendErrorResponse(
+					reply,
+					400,
+					"Please confirm the your email by clicking on the link sent to your email address"
+				);
+			}
+		} else {
+			const refreshToken = await getRefreshToken(user, request.ipAddress);
 
-		const emailStatus = await sendNewLoginEmail(user, request);
-
-		sendSuccessResponse(
-			reply,
-			{
-				statusCode: 200,
-				message: "Signed in",
-				token: user.getJWT(),
-				emailSuccess: emailStatus.success,
-				emailMessage: emailStatus.message,
-			},
-			{ refreshToken }
-		);
+			const emailStatus = await sendNewLoginEmail(user, request);
+			sendSuccessResponse(
+				reply,
+				{
+					statusCode: 200,
+					message: "Signed in",
+					token: user.getJWT(),
+					emailSuccess: emailStatus.success,
+					emailMessage: emailStatus.message,
+				},
+				{ refreshToken }
+			);
+		}
 	} else {
 		user = await User.create({
 			name,

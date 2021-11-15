@@ -27,6 +27,10 @@ const configs = {
 	DISABLE_MAIL: process.env.DISABLE_MAIL === "1" ? true : false,
 
 	HCAPTCHA_SECRET: process.env.HCAPTCHA_SECRET,
+	PROVIDER_LOGIN_EMAIL_CONFIRMATION_REQUIRED:
+		process.env.PROVIDER_LOGIN_EMAIL_CONFIRMATION_REQUIRED === "0"
+			? false
+			: true,
 	DISABLE_CAPTCHA:
 		process.env.DISABLE_CAPTCHA === "1" || !process.env.HCAPTCHA_SECRET
 			? true

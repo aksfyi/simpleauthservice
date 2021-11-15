@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema({
 	password: {
 		type: String,
 		minlength: 8,
-		select: false, // this will not be added to db
+		select: false, // this will not be selected in query
 	},
 	role: {
 		type: String,

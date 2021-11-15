@@ -21,7 +21,7 @@ const checkEmailConfirmed = (request, reply, done) => {
 		sendErrorResponse(
 			reply,
 			400,
-			"Please confirm the your email by clicking on the link in your email address"
+			"Please confirm the your email by clicking on the link sent to your email address"
 		);
 	}
 	done();
