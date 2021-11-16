@@ -22,9 +22,9 @@ const getOauthProviderLogin = async (request, reply) => {
 	const oauthHandler = new OauthProviderLogin(provider);
 	const loginUrl = oauthHandler.getRedirectUrl(state);
 	if (!loginUrl) {
-		sendErrorResponse(reply, 400, "Invalid Login Provider");
+		return sendErrorResponse(reply, 400, "Invalid Login Provider");
 	}
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		state,
 		message: "Successful",
@@ -42,7 +42,7 @@ const postOauthProviderLogin = async (request, reply) => {
 	const userDetails = await oauthHandler.getUserDetails(code);
 	let role;
 	if (!userDetails || userDetails.error) {
-		sendErrorResponse(
+		return sendErrorResponse(
 			reply,
 			userDetails.error ? 400 : 404,
 			userDetails.error ||
@@ -86,7 +86,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 	if (user) {
 		if (configs.PROVIDER_LOGIN_EMAIL_CONFIRMATION_REQUIRED) {
 			if (!user.isEmailConfirmed) {
-				sendErrorResponse(
+				return sendErrorResponse(
 					reply,
 					400,
 					"Please confirm the your email by clicking on the link sent to your email address"
@@ -96,7 +96,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 			const emailStatus = await sendNewLoginEmail(user, request);
-			sendSuccessResponse(
+			return sendSuccessResponse(
 				reply,
 				{
 					statusCode: 200,
@@ -129,7 +129,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			);
 		}
 		const refreshToken = await getRefreshToken(user, request.ipAddress);
-		sendSuccessResponse(
+		return sendSuccessResponse(
 			reply,
 			{
 				statusCode: 201,

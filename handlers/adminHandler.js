@@ -5,7 +5,7 @@ const { sendSuccessResponse } = require("./responseHelpers");
 // @desc	Check application configurations
 // @access	Private [admin only]
 const getConfigs = (request, reply) => {
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Success",
 		...checkConfigs,

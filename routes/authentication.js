@@ -27,7 +27,7 @@ const {
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
 
-const authenticationRoutes = (fastify, _, done) => {
+const authenticationRoutes = async (fastify, opts) => {
 	// signup and sign in routes
 	fastify.route({
 		method: "POST",
@@ -176,8 +176,6 @@ const authenticationRoutes = (fastify, _, done) => {
 		],
 		handler: revokeAllRefreshTokens,
 	});
-
-	done();
 };
 
 module.exports = {

@@ -2,7 +2,7 @@ const { getConfigs } = require("../handlers/adminHandler");
 const { verifyAuth } = require("../plugins/authVerify");
 const { adminSchema } = require("./schemas/adminSchema");
 
-const adminRoutes = (fastify, _, done) => {
+const adminRoutes = async (fastify, opts) => {
 	fastify.route({
 		method: "GET",
 		url: "/configs",
@@ -10,8 +10,6 @@ const adminRoutes = (fastify, _, done) => {
 		preHandler: verifyAuth(["admin"], true),
 		handler: getConfigs,
 	});
-
-	done();
 };
 
 module.exports = {

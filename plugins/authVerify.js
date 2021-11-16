@@ -9,14 +9,14 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
  * @returns
  */
 const verifyAuth = (roles = []) => {
-	return function (request, reply, done) {
+	return function async(request, reply) {
 		// Get the authorization header
 		const authorizationHeader = request.headers["authorization"];
 
 		// If the token is not sent in authorization header send error
 		// response
 		if (!authorizationHeader) {
-			sendErrorResponse(
+			return sendErrorResponse(
 				reply,
 				403,
 				"Token in the authorization header missing"
@@ -24,7 +24,7 @@ const verifyAuth = (roles = []) => {
 		} else if (!authorizationHeader.startsWith("Bearer ")) {
 			// If the header doesnt start with "Bearer " send error response
 			// "Bearer" is recommended but not mandatory (RFC)
-			sendErrorResponse(
+			return sendErrorResponse(
 				reply,
 				403,
 				"Format error . Please send the token as Bearer token"
@@ -37,14 +37,13 @@ const verifyAuth = (roles = []) => {
 
 			if (!roles.includes(decoded.role)) {
 				// If the user's role is not authorized to access the endpoint send error
-				sendErrorResponse(
+				return sendErrorResponse(
 					reply,
 					403,
 					"You have no permission to view this page"
 				);
 			}
 			request.user = decoded;
-			done();
 		}
 	};
 };

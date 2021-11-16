@@ -18,7 +18,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		if (shouldRedirect) {
 			if (type === "password") {
 				if (!configs.APP_RESET_PASSWORD_REDIRECT) {
-					sendErrorResponse(
+					return sendErrorResponse(
 						reply,
 						500,
 						"Please configure APP_RESET_PASSWORD_REDIRECT"
@@ -27,7 +27,7 @@ const tokenCheck = (type, shouldRedirect) => {
 				redirectURL = configs.APP_RESET_PASSWORD_REDIRECT;
 			} else if (type === "confirmEmail") {
 				if (!configs.APP_CONFIRM_EMAIL_REDIRECT) {
-					sendErrorResponse(
+					return sendErrorResponse(
 						reply,
 						500,
 						"Please configure APP_CONFIRM_EMAIL_REDIRECT"
@@ -38,7 +38,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!token) {
-			sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
+			return sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
 		}
 
 		const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
@@ -57,7 +57,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (!user) {
-			sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
+			return sendErrorResponse(reply, 400, "Invalid Token", { redirectURL });
 		}
 		if (type === "password") {
 			check = user.isPwResetTokenExpired();
@@ -66,7 +66,7 @@ const tokenCheck = (type, shouldRedirect) => {
 		}
 
 		if (check) {
-			sendErrorResponse(reply, 400, "Link expired", { redirectURL });
+			return sendErrorResponse(reply, 400, "Link expired", { redirectURL });
 		}
 
 		request.userModel = user;

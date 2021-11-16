@@ -30,8 +30,9 @@ const registerUser = async (request, reply) => {
 	const userExists = await User.findOne({
 		email: email,
 	});
+
 	if (userExists) {
-		sendErrorResponse(reply, 400, "Duplicate field value entered");
+		return sendErrorResponse(reply, 400, "Duplicate field value entered");
 	}
 
 	let provider = "email";
@@ -66,7 +67,7 @@ const registerUser = async (request, reply) => {
 		confirmationToken
 	);
 
-	sendSuccessResponse(
+	return sendSuccessResponse(
 		reply,
 		{
 			statusCode: 201,
@@ -94,7 +95,7 @@ const signin = async (request, reply) => {
 
 		const emailStatus = await sendNewLoginEmail(user, request);
 
-		sendSuccessResponse(
+		return sendSuccessResponse(
 			reply,
 			{
 				statusCode: 200,
@@ -108,7 +109,7 @@ const signin = async (request, reply) => {
 			}
 		);
 	} else {
-		sendErrorResponse(reply, 400, "Password Does not match");
+		return sendErrorResponse(reply, 400, "Password Does not match");
 	}
 };
 
@@ -116,7 +117,7 @@ const signin = async (request, reply) => {
 // @desc	Endpoint to confirm the email of the user
 // @access	Public (confirm email with the token . JWT is NOT required)
 const confirmEmailTokenRedirect = async (request, reply) => {
-	redirectWithToken(reply, request.query.token, {
+	return redirectWithToken(reply, request.query.token, {
 		redirectURL: configs.APP_CONFIRM_EMAIL_REDIRECT,
 	});
 };
@@ -131,7 +132,7 @@ const confirmEmail = async (request, reply) => {
 	user.isEmailConfirmed = true;
 	user.save({ validateBeforeSave: false });
 
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Account successfully confirmed",
 	});
@@ -143,10 +144,10 @@ const confirmEmail = async (request, reply) => {
 const requestConfirmationEmail = async (request, reply) => {
 	const user = request.userModel;
 	if (user.isEmailConfirmed) {
-		sendErrorResponse(reply, 400, "Email already confirmed");
+		return sendErrorResponse(reply, 400, "Email already confirmed");
 	}
 	if (!user.isConfirmEmailTokenExpired()) {
-		sendErrorResponse(
+		return sendErrorResponse(
 			reply,
 			400,
 			"Confirmation email was recently sent to your email. Check Spam/Promotions folder.\
@@ -163,10 +164,10 @@ const requestConfirmationEmail = async (request, reply) => {
 	);
 
 	if (!emailStatus.success) {
-		sendErrorResponse(reply, 500, emailStatus.message);
+		return sendErrorResponse(reply, 500, emailStatus.message);
 	}
 
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: emailStatus.message,
 		emailSuccess: emailStatus.success,
@@ -181,7 +182,11 @@ const requestResetPasswordToken = async (request, reply) => {
 	const user = request.userModel;
 
 	if (!user.isPwResetTokenExpired()) {
-		sendErrorResponse(reply, 400, "Please check your email, try again later");
+		return sendErrorResponse(
+			reply,
+			400,
+			"Please check your email, try again later"
+		);
 	}
 	const pwResetToken = user.getPwResetToken();
 	await user.save({ validateBeforeSave: false });
@@ -193,10 +198,10 @@ const requestResetPasswordToken = async (request, reply) => {
 	);
 
 	if (!emailStatus.success) {
-		sendErrorResponse(reply, 500, emailStatus.message);
+		return sendErrorResponse(reply, 500, emailStatus.message);
 	}
 
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: emailStatus.message,
 		emailSuccess: emailStatus.success,
@@ -209,7 +214,7 @@ const requestResetPasswordToken = async (request, reply) => {
 //		  	verifies the token and redirects to frontend
 // @access 	Public
 const resetPasswordTokenRedirect = async (request, reply) => {
-	redirectWithToken(reply, request.query.token, {
+	return redirectWithToken(reply, request.query.token, {
 		redirectURL: configs.APP_RESET_PASSWORD_REDIRECT,
 	});
 };
@@ -221,7 +226,7 @@ const resetPasswordFromToken = async (request, reply) => {
 	const user = request.userModel;
 	let { password, confirmPassword } = request.body;
 	if (password !== confirmPassword) {
-		sendErrorResponse(
+		return sendErrorResponse(
 			reply,
 			400,
 			"Password and confirmed password are different"
@@ -237,7 +242,7 @@ const resetPasswordFromToken = async (request, reply) => {
 
 		const emailStatus = await passwordChangedEmailAlert(user, request);
 
-		sendSuccessResponse(reply, {
+		return sendSuccessResponse(reply, {
 			statusCode: 200,
 			message: "Password Updated",
 			emailSuccess: emailStatus.success,
@@ -256,11 +261,11 @@ const updatePassword = async (request, reply) => {
 	const checkPassword = await user.matchPasswd(currentPassword);
 
 	if (!checkPassword) {
-		sendErrorResponse(reply, 400, "Your entered the wrong password");
+		return sendErrorResponse(reply, 400, "Your entered the wrong password");
 	}
 
 	if (password !== confirmPassword) {
-		sendErrorResponse(
+		return sendErrorResponse(
 			reply,
 			400,
 			"Password and confirmed password are different"
@@ -275,7 +280,7 @@ const updatePassword = async (request, reply) => {
 
 	const emailStatus = await passwordChangedEmailAlert(user, request);
 
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Password Updated",
 		emailSuccess: emailStatus.success,
@@ -288,7 +293,7 @@ const updatePassword = async (request, reply) => {
 // @access	Private(requires JWT token in header)
 const getProfile = async (request, reply) => {
 	const user = request.user;
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "User Found",
 		name: user.name,
@@ -316,15 +321,15 @@ const getJWTFromRefresh = async (request, reply) => {
 		isRevoked: false,
 	});
 	if (!rft) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+		return sendErrorResponse(reply, 400, "Invalid Refresh Token");
 	}
 	if (rft.isExpired()) {
-		sendErrorResponse(reply, 400, "Refresh Token Expired");
+		return sendErrorResponse(reply, 400, "Refresh Token Expired");
 	}
 	const user = await User.findById(rft.user);
 
 	if (!user) {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token");
+		return sendErrorResponse(reply, 400, "Invalid Refresh Token");
 	}
 
 	const jwtToken = user.getJWT();
@@ -332,7 +337,7 @@ const getJWTFromRefresh = async (request, reply) => {
 	rft.save();
 	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
 
-	sendSuccessResponse(
+	return sendSuccessResponse(
 		reply,
 		{
 			statusCode: 200,
@@ -358,7 +363,7 @@ const revokeRefreshToken = async (request, reply) => {
 	});
 
 	const sendInvalidToken = () => {
-		sendErrorResponse(reply, 400, "Invalid Refresh Token", {
+		return sendErrorResponse(reply, 400, "Invalid Refresh Token", {
 			clearCookie: true,
 		});
 	};
@@ -379,13 +384,13 @@ const revokeRefreshToken = async (request, reply) => {
 	}
 
 	if (rft.isExpired()) {
-		sendErrorResponse(reply, 400, "Refresh Token Expired", {
+		return sendErrorResponse(reply, 400, "Refresh Token Expired", {
 			clearCookie: true,
 		});
 	}
 	rft.revoke(request.ipAddress);
 	rft.save();
-	sendSuccessResponse(
+	return sendSuccessResponse(
 		reply,
 		{
 			statusCode: 200,
@@ -402,7 +407,7 @@ const revokeRefreshToken = async (request, reply) => {
 const revokeAllRefreshTokens = async (request, reply) => {
 	const user = request.userModel;
 	await revokeAllRfTokenByUser(user);
-	sendSuccessResponse(reply, {
+	return sendSuccessResponse(reply, {
 		statusCode: 200,
 		message: "Successfully revoked all tokens",
 	});

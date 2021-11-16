@@ -33,7 +33,6 @@ const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 				`${options.redirectURL}?error=${error}&message=${message}&success=false`
 			);
 	}
-	reply.sent = true;
 };
 
 const sendSuccessResponse = (reply, response, options = {}) => {
@@ -64,14 +63,12 @@ const sendSuccessResponse = (reply, response, options = {}) => {
 				`${options.redirectURL}?statusCode=${response.statusCode}&message=${response.message}&success=true`
 			);
 	}
-	reply.sent = true;
 };
 
 const redirectWithToken = (reply, token, options) => {
 	reply
 		.code(302)
 		.redirect(`${options.redirectURL}?token=${token}&success=true`);
-	reply.sent = true;
 };
 
 module.exports = {
