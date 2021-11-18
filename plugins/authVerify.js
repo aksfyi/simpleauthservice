@@ -9,7 +9,8 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
  * @returns
  */
 const verifyAuth = (roles = []) => {
-	return function async(request, reply) {
+	return async (request, reply) => {
+		request.log.info(`Verifying user auth roles: ${roles}`);
 		// Get the authorization header
 		const authorizationHeader = request.headers["authorization"];
 

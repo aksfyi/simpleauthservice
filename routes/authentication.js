@@ -11,7 +11,8 @@ const {
 	getJWTFromRefresh,
 	revokeRefreshToken,
 	revokeAllRefreshTokens,
-	getProfile,
+	getAccount,
+	deleteAccount,
 } = require("../handlers/authenticationHandler");
 const { verifyAuth } = require("../plugins/authVerify");
 const {
@@ -114,18 +115,32 @@ const authenticationRoutes = async (fastify, opts) => {
 		handler: resetPasswordFromToken,
 	});
 
-	// Route to get profile information
+	// Route to get account information
 	fastify.route({
 		method: "GET",
-		url: "/profile",
+		url: "/account",
 		preHandler: [
 			verifyAuth(["admin", "user"]),
 			attachUser(false),
 			checkEmailConfirmed,
 			checkDeactivated,
 		],
-		schema: authenticationSchema.profile,
-		handler: getProfile,
+		schema: authenticationSchema.getAccount,
+		handler: getAccount,
+	});
+
+	// Route to delete account
+	fastify.route({
+		method: "DELETE",
+		url: "/account",
+		preHandler: [
+			verifyAuth(["admin", "user"]),
+			checkDeactivated,
+			checkEmailConfirmed,
+			attachUserWithPassword(false),
+		],
+		schema: authenticationSchema.deleteAccount,
+		handler: deleteAccount,
 	});
 
 	// Route to update the password when the user is logged in
@@ -133,7 +148,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "PUT",
 		url: "/updatePassword",
 		preHandler: [
-			verifyAuth(["admin", "user"], false),
+			verifyAuth(["admin", "user"]),
 			checkDeactivated,
 			checkEmailConfirmed,
 			attachUserWithPassword(false),

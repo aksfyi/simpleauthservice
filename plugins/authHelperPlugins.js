@@ -8,13 +8,19 @@ const { default: axios } = require("axios");
  * Can be in the array of preHandlers after verifyAuth
  */
 const checkDeactivated = async (request, reply) => {
+	request.log.info("Checking if the user account is deactivated");
 	const user = request.user || request.userModel;
 	if (user.isDeactivated) {
 		return sendErrorResponse(reply, 400, "User account is deactivated");
 	}
 };
 
+/**
+ * This should be used only after the JWT tokens are verified
+ * Can be in the array of preHandlers after verifyAuth
+ */
 const checkEmailConfirmed = async (request, reply) => {
+	request.log.info("Checking if the user email is confirmed");
 	const user = request.user || request.userModel;
 	if (!user.isEmailConfirmed) {
 		return sendErrorResponse(
@@ -25,8 +31,17 @@ const checkEmailConfirmed = async (request, reply) => {
 	}
 };
 
+/**
+ * Attaches user to request object (request.userModel)
+ * @param {Boolean} byEmail true if email is being sent in request body.
+ * 	false if the route is protected (uses uid from the jwt token)
+ * @returns
+ */
 const attachUser = (byEmail) => {
 	return async (request, reply) => {
+		request.log.info(
+			`Attaching user by ${byEmail ? "email" : "user id in the token"}`
+		);
 		if (!byEmail) {
 			user = await User.findOne({
 				uid: request.user.uid,
@@ -41,8 +56,19 @@ const attachUser = (byEmail) => {
 	};
 };
 
+/**
+ * Attaches user (with password) to request object (request.userModel)
+ * @param {Boolean} byEmail true if email is being sent in request body.
+ * 	false if the route is protected (uses uid from the jwt token)
+ * @returns
+ */
 const attachUserWithPassword = (byEmail) => {
 	return async (request, reply) => {
+		request.log.info(
+			`Attaching user with password by ${
+				byEmail ? "email" : " user id in the token"
+			}`
+		);
 		let user;
 		if (!byEmail) {
 			user = await User.findOne({
@@ -59,6 +85,7 @@ const attachUserWithPassword = (byEmail) => {
 };
 
 const checkPasswordLength = async (request, reply) => {
+	request.log.info("Checking password length");
 	const password = request.body.password;
 	if (password.length < 8) {
 		return sendErrorResponse(reply, 400, "Minimum password length should be 8");
@@ -66,6 +93,7 @@ const checkPasswordLength = async (request, reply) => {
 };
 
 const checkMailingDisabled = async (request, reply) => {
+	request.log.info("Checking if mailing is disabled in the server");
 	if (configs.DISABLE_MAIL) {
 		return sendErrorResponse(reply, 500, "Mailing is disabled in the server");
 	}
@@ -78,7 +106,13 @@ const checkMailingDisabled = async (request, reply) => {
 	}
 };
 
+/**
+ *
+ * Checks if the request token is valid
+ * @returns
+ */
 const refreshTokenValidation = async (request, reply) => {
+	request.log.info("Validating refresh token");
 	// If refresh token is sent in request body attach it to request object
 	// (request.refreshToken) else check cookie and validate the token in the cookie
 	// then attach it to request body (request.refreshToken) if the cookie is
@@ -108,7 +142,13 @@ const refreshTokenValidation = async (request, reply) => {
 	}
 };
 
+/**
+ *
+ * Function used to verify hcaptcha token
+ * @returns
+ */
 const hCaptchaVerification = async (request, reply) => {
+	request.log.info("Verifying hcaptcha token");
 	if (!configs.DISABLE_CAPTCHA) {
 		if (!configs.HCAPTCHA_SECRET) {
 			return sendErrorResponse(

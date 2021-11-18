@@ -288,10 +288,10 @@ const updatePassword = async (request, reply) => {
 	});
 };
 
-// @route 	GET /api/v1/auth/profile
+// @route 	GET /api/v1/auth/account
 // @desc 	Route used to get user Info
 // @access	Private(requires JWT token in header)
-const getProfile = async (request, reply) => {
+const getAccount = async (request, reply) => {
 	const user = request.user;
 	return sendSuccessResponse(reply, {
 		statusCode: 200,
@@ -301,6 +301,40 @@ const getProfile = async (request, reply) => {
 		role: user.role,
 		isEmailConfirmed: user.isEmailConfirmed,
 		isDeactivated: user.isDeactivated,
+	});
+};
+
+// @route 	DELETE /api/v1/auth/account
+// @desc 	Route used to DELETE user account
+// @access	Private(requires JWT token in header)
+const deleteAccount = async (request, reply) => {
+	const user = request.userModel;
+	const { password } = request.body;
+	const checkPassword = await user.matchPasswd(password);
+
+	if (!checkPassword) {
+		return sendErrorResponse(
+			reply,
+			400,
+			"We could not delete your account.Your entered the wrong password"
+		);
+	}
+
+	// Log out of all devices
+	await revokeAllRfTokenByUser(user, request.ipAddress);
+
+	// Account is deactivated here, after 10 days
+	// the accounts which are deactivated will be deleted
+	// by the cron job
+	user.isDeactivated = true;
+	user.deactivatedAt = Date.now();
+
+	user.save();
+
+	return sendSuccessResponse(reply, {
+		statusCode: 200,
+		message:
+			"Account deactivated. Your account will be deleted from the database after 10 days",
 	});
 };
 
@@ -426,5 +460,6 @@ module.exports = {
 	getJWTFromRefresh,
 	revokeRefreshToken,
 	revokeAllRefreshTokens,
-	getProfile,
+	getAccount,
+	deleteAccount,
 };
