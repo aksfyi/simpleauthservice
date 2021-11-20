@@ -50,6 +50,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | PROVIDER_LOGIN_EMAIL_CONFIRMATION_REQUIRED | Email confirmation required if the email is not verified in oauth provider account                                                                                        | true (0 to disable)                                                  |
 | SEND_NEW_LOGIN_EMAIL                       | Send email alert if the user is logged in                                                                                                                                 | 0 (1 to send)                                                        |
 | HOST                                       | Fastify will run on 127.0.0.1 if HOST not set.Set this to 0.0.0.0 when deploying using docker.Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server | Fastify will run the application in localhost (127.0.0.1) by default |
+| DISABLE_EMAIL_LOGIN                        | "1" to enable login with only oauth providers                                                                                                                             | false                                                                |
 ### SMTP Configuration
 Configurations required to send email
 | Environment variable |

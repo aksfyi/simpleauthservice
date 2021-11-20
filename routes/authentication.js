@@ -28,30 +28,86 @@ const {
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
+const { configs } = require("../configs");
 
 const authenticationRoutes = async (fastify, opts) => {
-	// signup and sign in routes
-	fastify.route({
-		method: "POST",
-		url: "/signup",
-		schema: authenticationSchema.signup,
-		preHandler: [checkEmailLoginDisabled, hCaptchaVerification],
-		handler: registerUser,
-	});
+	if (!configs.DISABLE_EMAIL_LOGIN) {
+		// signup and sign in routes
+		fastify.route({
+			method: "POST",
+			url: "/signup",
+			schema: authenticationSchema.signup,
+			preHandler: [checkEmailLoginDisabled, hCaptchaVerification],
+			handler: registerUser,
+		});
 
-	fastify.route({
-		method: "POST",
-		url: "/signin",
-		preHandler: [
-			checkEmailLoginDisabled,
-			hCaptchaVerification,
-			attachUserWithPassword(true),
-			checkDeactivated,
-			checkEmailConfirmed,
-		],
-		schema: authenticationSchema.signin,
-		handler: signin,
-	});
+		fastify.route({
+			method: "POST",
+			url: "/signin",
+			preHandler: [
+				checkEmailLoginDisabled,
+				hCaptchaVerification,
+				attachUserWithPassword(true),
+				checkDeactivated,
+				checkEmailConfirmed,
+			],
+			schema: authenticationSchema.signin,
+			handler: signin,
+		});
+
+		// Route to check reset password token and redirect to frontend
+		fastify.route({
+			method: "GET",
+			url: "/resetPassword",
+			preHandler: [checkEmailLoginDisabled, tokenCheck("password", true)],
+			schema: authenticationSchema.resetPasswordGet,
+			handler: resetPasswordTokenRedirect,
+		});
+
+		// Request for reset password token
+		fastify.route({
+			method: "POST",
+			url: "/resetPassword",
+			schema: authenticationSchema.resetPasswordPost,
+			preHandler: [
+				checkEmailLoginDisabled,
+				hCaptchaVerification,
+				checkMailingDisabled,
+				attachUser(true),
+				checkDeactivated,
+			],
+			handler: requestResetPasswordToken,
+		});
+
+		// Route to reset password from token
+		fastify.route({
+			method: "PUT",
+			url: "/resetPassword",
+			schema: authenticationSchema.resetPasswordPut,
+			preHandler: [
+				checkEmailLoginDisabled,
+				tokenCheck("password"),
+				checkPasswordLength,
+			],
+			handler: resetPasswordFromToken,
+		});
+
+		// Route to update the password when the user is logged in
+		fastify.route({
+			method: "PUT",
+			url: "/updatePassword",
+			preHandler: [
+				checkEmailLoginDisabled,
+				verifyAuth(["admin", "user"]),
+				checkDeactivated,
+				checkEmailConfirmed,
+				attachUserWithPassword(false),
+				checkPasswordLength,
+			],
+			schema: authenticationSchema.updatePassword,
+			handler: updatePassword,
+		});
+	}
 
 	// Route to redirect user to the frontend
 	fastify.route({
@@ -85,43 +141,6 @@ const authenticationRoutes = async (fastify, opts) => {
 		handler: confirmEmail,
 	});
 
-	// Route to check reset password token and redirect to frontend
-	fastify.route({
-		method: "GET",
-		url: "/resetPassword",
-		preHandler: [checkEmailLoginDisabled, tokenCheck("password", true)],
-		schema: authenticationSchema.resetPasswordGet,
-		handler: resetPasswordTokenRedirect,
-	});
-
-	// Request for reset password token
-	fastify.route({
-		method: "POST",
-		url: "/resetPassword",
-		schema: authenticationSchema.resetPasswordPost,
-		preHandler: [
-			checkEmailLoginDisabled,
-			hCaptchaVerification,
-			checkMailingDisabled,
-			attachUser(true),
-			checkDeactivated,
-		],
-		handler: requestResetPasswordToken,
-	});
-
-	// Route to reset password from token
-	fastify.route({
-		method: "PUT",
-		url: "/resetPassword",
-		schema: authenticationSchema.resetPasswordPut,
-		preHandler: [
-			checkEmailLoginDisabled,
-			tokenCheck("password"),
-			checkPasswordLength,
-		],
-		handler: resetPasswordFromToken,
-	});
-
 	// Route to get account information
 	fastify.route({
 		method: "GET",
@@ -148,22 +167,6 @@ const authenticationRoutes = async (fastify, opts) => {
 		],
 		schema: authenticationSchema.deleteAccount,
 		handler: deleteAccount,
-	});
-
-	// Route to update the password when the user is logged in
-	fastify.route({
-		method: "PUT",
-		url: "/updatePassword",
-		preHandler: [
-			checkEmailLoginDisabled,
-			verifyAuth(["admin", "user"]),
-			checkDeactivated,
-			checkEmailConfirmed,
-			attachUserWithPassword(false),
-			checkPasswordLength,
-		],
-		schema: authenticationSchema.updatePassword,
-		handler: updatePassword,
 	});
 
 	// Route to get new JWT & refresh token
