@@ -173,18 +173,18 @@ const hCaptchaVerification = async (request, reply) => {
 	}
 };
 
-/**
- *
- * checkEmailLoginDisabled is used to enable login
- * with only oauth providers
- * @returns
- */
-const checkEmailLoginDisabled = async (request, reply) => {
-	request.log.info("Checking if email login is disabled");
-	if (configs.DISABLE_EMAIL_LOGIN) {
-		return sendErrorResponse(reply, 400, "Email login is disabled");
-	}
-};
+// /**
+//  *
+//  * checkEmailLoginDisabled is used to enable login
+//  * with only oauth providers
+//  * @returns
+//  */
+// const checkEmailLoginDisabled = async (request, reply) => {
+// 	request.log.info("Checking if email login is disabled");
+// 	if (configs.DISABLE_EMAIL_LOGIN) {
+// 		return sendErrorResponse(reply, 400, "Email login is disabled");
+// 	}
+// };
 
 const must = (reply, parameter, message) => {
 	if (!parameter) {
@@ -201,5 +201,5 @@ module.exports = {
 	checkMailingDisabled,
 	refreshTokenValidation,
 	hCaptchaVerification,
-	checkEmailLoginDisabled,
+	//checkEmailLoginDisabled,
 };
