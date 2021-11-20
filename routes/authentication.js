@@ -24,6 +24,7 @@ const {
 	checkMailingDisabled,
 	refreshTokenValidation,
 	hCaptchaVerification,
+	checkEmailLoginDisabled,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
@@ -34,7 +35,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "POST",
 		url: "/signup",
 		schema: authenticationSchema.signup,
-		preHandler: hCaptchaVerification,
+		preHandler: [checkEmailLoginDisabled, hCaptchaVerification],
 		handler: registerUser,
 	});
 
@@ -42,6 +43,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "POST",
 		url: "/signin",
 		preHandler: [
+			checkEmailLoginDisabled,
 			hCaptchaVerification,
 			attachUserWithPassword(true),
 			checkDeactivated,
@@ -87,7 +89,7 @@ const authenticationRoutes = async (fastify, opts) => {
 	fastify.route({
 		method: "GET",
 		url: "/resetPassword",
-		preHandler: tokenCheck("password", true),
+		preHandler: [checkEmailLoginDisabled, tokenCheck("password", true)],
 		schema: authenticationSchema.resetPasswordGet,
 		handler: resetPasswordTokenRedirect,
 	});
@@ -98,6 +100,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		url: "/resetPassword",
 		schema: authenticationSchema.resetPasswordPost,
 		preHandler: [
+			checkEmailLoginDisabled,
 			hCaptchaVerification,
 			checkMailingDisabled,
 			attachUser(true),
@@ -111,7 +114,11 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "PUT",
 		url: "/resetPassword",
 		schema: authenticationSchema.resetPasswordPut,
-		preHandler: [tokenCheck("password"), checkPasswordLength],
+		preHandler: [
+			checkEmailLoginDisabled,
+			tokenCheck("password"),
+			checkPasswordLength,
+		],
 		handler: resetPasswordFromToken,
 	});
 
@@ -148,6 +155,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "PUT",
 		url: "/updatePassword",
 		preHandler: [
+			checkEmailLoginDisabled,
 			verifyAuth(["admin", "user"]),
 			checkDeactivated,
 			checkEmailConfirmed,

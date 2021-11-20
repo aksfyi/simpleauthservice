@@ -35,6 +35,8 @@ const configs = {
 		process.env.DISABLE_CAPTCHA === "1" || !process.env.HCAPTCHA_SECRET
 			? true
 			: false,
+
+	DISABLE_EMAIL_LOGIN: process.env.DISABLE_EMAIL_LOGIN === "1" ? true : false,
 	HCAPTCHA_VERIFY_URL: "https://hcaptcha.com/siteverify",
 
 	IS_SMTP_CONFIGURED: false,
