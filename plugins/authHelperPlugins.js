@@ -7,28 +7,41 @@ const { default: axios } = require("axios");
  * This should be used only after the JWT tokens are verified
  * Can be in the array of preHandlers after verifyAuth
  */
-const checkDeactivated = (request, reply, done) => {
+const checkDeactivated = async (request, reply) => {
+	request.log.info("Checking if the user account is deactivated");
 	const user = request.user || request.userModel;
 	if (user.isDeactivated) {
-		sendErrorResponse(reply, 400, "User account is deactivated");
+		return sendErrorResponse(reply, 400, "User account is deactivated");
 	}
-	done();
 };
 
-const checkEmailConfirmed = (request, reply, done) => {
+/**
+ * This should be used only after the JWT tokens are verified
+ * Can be in the array of preHandlers after verifyAuth
+ */
+const checkEmailConfirmed = async (request, reply) => {
+	request.log.info("Checking if the user email is confirmed");
 	const user = request.user || request.userModel;
 	if (!user.isEmailConfirmed) {
-		sendErrorResponse(
+		return sendErrorResponse(
 			reply,
 			400,
-			"Please confirm the your email by clicking on the link in your email address"
+			"Please confirm the your email by clicking on the link sent to your email address"
 		);
 	}
-	done();
 };
 
+/**
+ * Attaches user to request object (request.userModel)
+ * @param {Boolean} byEmail true if email is being sent in request body.
+ * 	false if the route is protected (uses uid from the jwt token)
+ * @returns
+ */
 const attachUser = (byEmail) => {
 	return async (request, reply) => {
+		request.log.info(
+			`Attaching user by ${byEmail ? "email" : "user id in the token"}`
+		);
 		if (!byEmail) {
 			user = await User.findOne({
 				uid: request.user.uid,
@@ -43,8 +56,19 @@ const attachUser = (byEmail) => {
 	};
 };
 
+/**
+ * Attaches user (with password) to request object (request.userModel)
+ * @param {Boolean} byEmail true if email is being sent in request body.
+ * 	false if the route is protected (uses uid from the jwt token)
+ * @returns
+ */
 const attachUserWithPassword = (byEmail) => {
 	return async (request, reply) => {
+		request.log.info(
+			`Attaching user with password by ${
+				byEmail ? "email" : " user id in the token"
+			}`
+		);
 		let user;
 		if (!byEmail) {
 			user = await User.findOne({
@@ -61,22 +85,34 @@ const attachUserWithPassword = (byEmail) => {
 };
 
 const checkPasswordLength = async (request, reply) => {
+	request.log.info("Checking password length");
 	const password = request.body.password;
 	if (password.length < 8) {
-		sendErrorResponse(reply, 400, "Minimum password length should be 8");
+		return sendErrorResponse(reply, 400, "Minimum password length should be 8");
 	}
 };
 
 const checkMailingDisabled = async (request, reply) => {
+	request.log.info("Checking if mailing is disabled in the server");
 	if (configs.DISABLE_MAIL) {
-		sendErrorResponse(reply, 500, "Mailing is disabled in the server");
+		return sendErrorResponse(reply, 500, "Mailing is disabled in the server");
 	}
 	if (!configs.IS_SMTP_CONFIGURED) {
-		sendErrorResponse(reply, 500, "Mailing is not configured in the server");
+		return sendErrorResponse(
+			reply,
+			500,
+			"Mailing is not configured in the server"
+		);
 	}
 };
 
+/**
+ *
+ * Checks if the request token is valid
+ * @returns
+ */
 const refreshTokenValidation = async (request, reply) => {
+	request.log.info("Validating refresh token");
 	// If refresh token is sent in request body attach it to request object
 	// (request.refreshToken) else check cookie and validate the token in the cookie
 	// then attach it to request body (request.refreshToken) if the cookie is
@@ -85,7 +121,7 @@ const refreshTokenValidation = async (request, reply) => {
 	if (!refreshTokenBody) {
 		const refreshTokenCookie = request.cookies.refreshToken;
 		if (!refreshTokenCookie) {
-			sendErrorResponse(reply, 400, "Missing refresh token in cookie");
+			return sendErrorResponse(reply, 400, "Missing refresh token in cookie");
 		}
 		// Fastify-cookie has a function which can be used to sign & unsign tokens
 		// unsignCookie returns valid, renew & false
@@ -95,7 +131,7 @@ const refreshTokenValidation = async (request, reply) => {
 		let refreshToken = request.unsignCookie(refreshTokenCookie);
 
 		if (!refreshToken.valid) {
-			sendErrorResponse(reply, 400, "Invalid Refresh Token", {
+			return sendErrorResponse(reply, 400, "Invalid Refresh Token", {
 				clearCookie: true,
 			});
 		} else {
@@ -106,10 +142,16 @@ const refreshTokenValidation = async (request, reply) => {
 	}
 };
 
+/**
+ *
+ * Function used to verify hcaptcha token
+ * @returns
+ */
 const hCaptchaVerification = async (request, reply) => {
+	request.log.info("Verifying hcaptcha token");
 	if (!configs.DISABLE_CAPTCHA) {
 		if (!configs.HCAPTCHA_SECRET) {
-			sendErrorResponse(
+			return sendErrorResponse(
 				reply,
 				500,
 				"Robot verification not configured in the server (hCaptcha)"
@@ -126,14 +168,27 @@ const hCaptchaVerification = async (request, reply) => {
 			)}`,
 		});
 		if (!tokenVerify.data.success) {
-			sendErrorResponse(reply, 400, "Robot verification unsuccessful");
+			return sendErrorResponse(reply, 400, "Robot verification unsuccessful");
 		}
 	}
 };
 
+// /**
+//  *
+//  * checkEmailLoginDisabled is used to enable login
+//  * with only oauth providers
+//  * @returns
+//  */
+// const checkEmailLoginDisabled = async (request, reply) => {
+// 	request.log.info("Checking if email login is disabled");
+// 	if (configs.DISABLE_EMAIL_LOGIN) {
+// 		return sendErrorResponse(reply, 400, "Email login is disabled");
+// 	}
+// };
+
 const must = (reply, parameter, message) => {
 	if (!parameter) {
-		sendErrorResponse(reply, 400, message);
+		return sendErrorResponse(reply, 400, message);
 	}
 };
 
@@ -146,4 +201,5 @@ module.exports = {
 	checkMailingDisabled,
 	refreshTokenValidation,
 	hCaptchaVerification,
+	//checkEmailLoginDisabled,
 };

@@ -5,7 +5,7 @@ const {
 const oauthCheck = require("../plugins/oauthCheck");
 const { oauthSchema } = require("./schemas/oauth2ProviderSchema");
 
-const oauth2Routes = (fastify, _, done) => {
+const oauth2Routes = async (fastify, opts) => {
 	fastify.route({
 		method: "GET",
 		url: "/:provider",
@@ -21,8 +21,6 @@ const oauth2Routes = (fastify, _, done) => {
 		preHandler: oauthCheck,
 		handler: postOauthProviderLogin,
 	});
-
-	done();
 };
 
 module.exports = {

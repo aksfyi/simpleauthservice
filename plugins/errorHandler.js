@@ -54,7 +54,7 @@ const getErrorHandler = (fastify) => {
 			statusCode = 400;
 		}
 
-		sendErrorResponse(reply, statusCode, message);
+		return sendErrorResponse(reply, statusCode, message);
 	};
 };
 
@@ -62,18 +62,18 @@ const getErrorHandler = (fastify) => {
 const axiosErrorHandler = (reply, err) => {
 	switch (err.config.url) {
 		case configs.HCAPTCHA_VERIFY_URL:
-			sendErrorResponse(reply, 400, "Robot verification unsuccessful");
+			return sendErrorResponse(reply, 400, "Robot verification unsuccessful");
 			break;
 		case configs.GITHUB_CONFIGS.ACCESS_TOKEN ||
 			configs.GITHUB_CONFIGS.AUTHORIZE:
-			sendErrorResponse(reply, 400, "Could not Login with Github");
+			return sendErrorResponse(reply, 400, "Could not Login with Github");
 			break;
 		case configs.GOOGLE_CONFIGS.ACCESS_TOKEN ||
 			configs.GOOGLE_CONFIGS.AUTHORIZE:
-			sendErrorResponse(reply, 400, "Could not Login with Google");
+			return sendErrorResponse(reply, 400, "Could not Login with Google");
 			break;
 		default:
-			sendErrorResponse(
+			return sendErrorResponse(
 				reply,
 				500,
 				"Could not send axios request. Internal Server Error"

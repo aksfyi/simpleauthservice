@@ -11,6 +11,8 @@ const statsJobsInit = (fastify) => {
 		const startDate = endDate - 24 * 60 * 60 * 1000;
 
 		await executeJob(
+			cronExpressions.USER_STATS.jobName,
+			fastify,
 			async () => {
 				const resultsTodayJoined = await User.find({
 					createdAt: {
@@ -41,10 +43,7 @@ const statsJobsInit = (fastify) => {
 					activeUsersCount,
 				});
 			},
-			cronExpressions.USER_STATS.jobName,
-			fastify,
-			startDate,
-			endDate
+			{ startDate, endDate }
 		);
 	});
 };

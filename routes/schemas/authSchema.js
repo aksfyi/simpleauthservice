@@ -231,7 +231,7 @@ const authenticationSchema = {
 			403: errors[403],
 		},
 	},
-	profile: {
+	getAccount: {
 		description: "Get profile information of the logged in user",
 		tags: ["User"],
 		security: jwtSecurity,
@@ -243,6 +243,24 @@ const authenticationSchema = {
 				isEmailConfirmed: { type: "boolean" },
 				isDeactivated: { type: "boolean" },
 			}),
+			400: errors[400],
+			500: errors[500],
+			403: errors[403],
+		},
+	},
+	deleteAccount: {
+		description: "Delete user account",
+		tags: ["User"],
+		security: jwtSecurity,
+		body: {
+			type: "object",
+			properties: {
+				password: { type: "string", example: "asdhfgjkfhey%&6da" },
+			},
+			required: ["password"],
+		},
+		response: {
+			200: getSuccessObject(200, true, "Delete Account Successful", {}),
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],

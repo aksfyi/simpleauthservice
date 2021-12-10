@@ -15,13 +15,11 @@ const userSchema = new mongoose.Schema({
 		unique: true,
 	},
 	email: {
+		// validation was removed since fastify validates
+		// it using schema
 		type: String,
 		unique: true,
 		required: [true, "Please submit an email"],
-		match: [
-			/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
-			"Please submit a valid email",
-		],
 	},
 	provider: {
 		// Provider used during sign up
@@ -33,7 +31,7 @@ const userSchema = new mongoose.Schema({
 	password: {
 		type: String,
 		minlength: 8,
-		select: false, // this will not be added to db
+		select: false, // this will not be selected in query
 	},
 	role: {
 		type: String,
