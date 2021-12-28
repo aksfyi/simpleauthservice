@@ -46,12 +46,14 @@ const responseErrors = {
 
 const jwtSecurity = [
 	{
-		JWTToken: {
-			description: 'Authorization header token, sample: "Bearer {token}"',
-			type: "apiKey",
-			name: "Authorization",
-			in: "header",
-		},
+		JWTToken: [
+			{
+				description: 'Authorization header token, sample: "Bearer {token}"',
+				type: "apiKey",
+				name: "Authorization",
+				in: "header",
+			},
+		],
 	},
 ];
 
