@@ -1,5 +1,5 @@
 const { configs, keywords } = require("../configs");
-const { sendErrorResponse } = require("../handlers/responseHelpers");
+const { sendErrorResponse } = require("../utils/responseHelpers");
 
 const getErrorHandler = (fastify) => {
 	return function (err, request, reply) {

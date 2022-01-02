@@ -1,5 +1,5 @@
 const { configs } = require("../configs");
-const { getRefreshTokenOptns } = require("../utils/authhelpers");
+const { getRefreshTokenOptns } = require("../models/refreshToken");
 
 const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 	let error = "Internal Server Error";

@@ -25,4 +25,6 @@ const jobsSchema = new mongoose.Schema({
 	endDate: Date,
 });
 
-module.exports = mongoose.model("Jobs", jobsSchema);
+module.exports = {
+	Jobs: mongoose.model("Jobs", jobsSchema),
+};

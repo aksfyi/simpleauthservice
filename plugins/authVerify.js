@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { configs } = require("../configs");
-const { sendErrorResponse } = require("../handlers/responseHelpers");
+const { sendErrorResponse } = require("../utils/responseHelpers");
 
 /**
  * Plugin to verify if the user is authenticated/authorized to access
@@ -11,6 +11,7 @@ const { sendErrorResponse } = require("../handlers/responseHelpers");
 const verifyAuth = (roles = []) => {
 	return async (request, reply) => {
 		request.log.info(`Verifying user auth roles: ${roles}`);
+		request.JWT_TYPE = "auth";
 		// Get the authorization header
 		const authorizationHeader = request.headers["authorization"];
 

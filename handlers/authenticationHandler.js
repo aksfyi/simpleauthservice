@@ -1,10 +1,3 @@
-const {
-	hashPasswd,
-	getRefreshToken,
-	revokeAllRfTokenByUser,
-} = require("../utils/authhelpers");
-const User = require("../models/user");
-const RefreshToken = require("../models/refreshToken");
 const crypto = require("crypto");
 const { configs } = require("../configs");
 const {
@@ -14,10 +7,17 @@ const {
 	passwordResetEmailHelper,
 } = require("../utils/services/sendEmail");
 const {
+	RefreshToken,
+	getRefreshToken,
+	revokeAllRfTokenByUser,
+	getRftById,
+} = require("../models/refreshToken");
+const { User, hashPasswd } = require("../models/user");
+const {
 	sendErrorResponse,
 	sendSuccessResponse,
 	redirectWithToken,
-} = require("./responseHelpers");
+} = require("../utils/responseHelpers");
 
 // @route	POST /api/v1/auth/signup
 // @desc	handler for registering user to database, returns
@@ -348,12 +348,8 @@ const getJWTFromRefresh = async (request, reply) => {
 	// valid (boolean) : the cookie has been unsigned successfully
 	// renew (boolean) : the cookie has been unsigned with an old secret
 	// value (string/null) : if the cookie is valid then returns string else null
-	let refreshToken = request.refreshToken;
 
-	const rft = await RefreshToken.findOne({
-		token: crypto.createHash("sha256").update(refreshToken).digest("hex"),
-		isRevoked: false,
-	});
+	const rft = getRftById(request.rtid);
 	if (!rft) {
 		return sendErrorResponse(reply, 400, "Invalid Refresh Token");
 	}
@@ -388,13 +384,7 @@ const getJWTFromRefresh = async (request, reply) => {
 // @desc	revokes the refresh token. Used when logging out
 // @access  Private(required JWT in authorization header)
 const revokeRefreshToken = async (request, reply) => {
-	const rft = await RefreshToken.findOne({
-		token: crypto
-			.createHash("sha256")
-			.update(request.refreshToken)
-			.digest("hex"),
-		isRevoked: false,
-	});
+	const rft = getRftById(request.rtid);
 
 	const sendInvalidToken = () => {
 		return sendErrorResponse(reply, 400, "Invalid Refresh Token", {

@@ -1,8 +1,8 @@
 const cron = require("node-cron");
+const { RefreshToken } = require("../models/refreshToken");
+const { Stats } = require("../models/stats");
+const { User } = require("../models/user");
 const { executeJob, cronExpressions } = require("./helper");
-const User = require("../models/user");
-const RefreshToken = require("../models/refreshToken");
-const Stats = require("../models/stats");
 
 const statsJobsInit = (fastify) => {
 	cron.schedule(cronExpressions.USER_STATS.expression, async () => {

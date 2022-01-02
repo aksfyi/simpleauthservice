@@ -1,14 +1,16 @@
-const { default: axios } = require("axios");
 const { configs } = require("../configs");
-const User = require("../models/user");
-const { getRefreshToken } = require("../utils/authhelpers");
 const {
 	sendNewLoginEmail,
 	confirmationEmailHelper,
 } = require("../utils/services/sendEmail");
 const { OauthProviderLogin } = require("../utils/services/oauthProviderLogin");
-const { sendErrorResponse, sendSuccessResponse } = require("./responseHelpers");
 const crypto = require("crypto");
+const {
+	sendErrorResponse,
+	sendSuccessResponse,
+} = require("../utils/responseHelpers");
+const { User } = require("../models/user");
+const { getRefreshToken } = require("../models/refreshToken");
 
 // @route 	GET /api/v1/auth/oauth/:provider
 // @desc	Route which accepts state and returns

@@ -14,4 +14,6 @@ const statsSchema = new mongoose.Schema({
 	endDate: Date,
 });
 
-module.exports = mongoose.model("Stats", statsSchema);
+module.exports = {
+	Stats: mongoose.model("Stats", statsSchema),
+};
