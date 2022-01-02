@@ -25,6 +25,8 @@ const {
 // @access	Public
 const registerUser = async (request, reply) => {
 	let { name, email, password } = request.body;
+	let role = "user";
+	let provider = "email";
 
 	// Check if there is an account with the same email
 	const userExists = await User.findOne({
@@ -35,9 +37,7 @@ const registerUser = async (request, reply) => {
 		return sendErrorResponse(reply, 400, "Duplicate field value entered");
 	}
 
-	let provider = "email";
 	password = await hashPasswd(password);
-	let role = "user";
 
 	// Set Role to admin if no users exist
 	if (configs.CHECK_ADMIN) {

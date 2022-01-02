@@ -34,11 +34,15 @@ const getErrorHandler = (fastify) => {
 				statusCode = 404;
 				break;
 			case "TokenExpiredError":
-				message = "Session expired";
+				message =
+					request.JWT_TYPE === "auth"
+						? "Session Expired"
+						: "Refresh Token Expired";
 				statusCode = 403;
 				break;
 			case "JsonWebTokenError":
-				message = "Token Error";
+				message =
+					request.JWT_TYPE === "auth" ? "Token error" : "Refresh Token error";
 				statusCode = 403;
 				break;
 			case "ValidationError":
