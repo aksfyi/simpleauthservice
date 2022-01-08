@@ -84,7 +84,7 @@ userSchema.methods.getJWT = function () {
 			// isAccountVerified: this.isAccountVerified,
 			isDeactivated: this.isDeactivated,
 		},
-		process.env.JWT_KEY,
+		configs.JWT_KEY,
 		{
 			expiresIn: "15m",
 		}

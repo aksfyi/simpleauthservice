@@ -64,7 +64,12 @@ fastify.get("/", async (request, reply) => {
 // Start the server
 const start = async () => {
 	try {
-		if (configs.JWT_KEY && configs.MONGO_URI && configs.COOKIE_SECRET) {
+		if (
+			configs.JWT_KEY &&
+			configs.MONGO_URI &&
+			configs.COOKIE_SECRET &&
+			configs.REFRESH_KEY
+		) {
 			// Connect to MongoDB Database
 			connectDB(fastify);
 			await fastify.listen(configs.PORT, configs.HOST);

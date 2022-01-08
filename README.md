@@ -43,6 +43,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | CHECK_ADMIN                                | Checks if admin user exists when signing up                                                                                                                               | 1 (0 to skip check)                                                  |
 | REFRESH_RESPONSE                           | Sends Refresh Token in response                                                                                                                                           | false (1 to send)                                                    |
 | JWT_KEY                                    | Key used to sign JWT                                                                                                                                                      | -                                                                    |
+| REFRESH_KEY                                | Key used to sign refresh token                                                                                                                                            | -                                                                    |
 | PORT                                       | Application Port                                                                                                                                                          | 5000                                                                 |
 | ALLOW_CORS_ORIGIN                          | Origin for Cors                                                                                                                                                           | Disables CORS if its not configured                                  |
 | DISABLE_MAIL                               | Setting it to 1 , disables sending emails                                                                                                                                 | -                                                                    |
@@ -51,6 +52,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | SEND_NEW_LOGIN_EMAIL                       | Send email alert if the user is logged in                                                                                                                                 | 0 (1 to send)                                                        |
 | HOST                                       | Fastify will run on 127.0.0.1 if HOST not set.Set this to 0.0.0.0 when deploying using docker.Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server | Fastify will run the application in localhost (127.0.0.1) by default |
 | DISABLE_EMAIL_LOGIN                        | "1" to enable login with only oauth providers                                                                                                                             | false                                                                |
+
 ### SMTP Configuration
 Configurations required to send email
 | Environment variable |

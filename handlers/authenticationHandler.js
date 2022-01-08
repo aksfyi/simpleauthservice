@@ -24,6 +24,8 @@ const {
 // 			jwt and refresh token
 // @access	Public
 const registerUser = async (request, reply) => {
+	request.log.info("handlers/registerUser");
+
 	let { name, email, password } = request.body;
 	let role = "user";
 	let provider = "email";
@@ -87,6 +89,7 @@ const registerUser = async (request, reply) => {
 //			 response with JWT and Refresh token
 // @access 	 Public
 const signin = async (request, reply) => {
+	request.log.info("handlers/signin");
 	const { password } = request.body;
 	const user = request.userModel;
 
@@ -117,6 +120,7 @@ const signin = async (request, reply) => {
 // @desc	Endpoint to confirm the email of the user
 // @access	Public (confirm email with the token . JWT is NOT required)
 const confirmEmailTokenRedirect = async (request, reply) => {
+	request.log.info("handlers/confirmEmailTokenRedirect");
 	return redirectWithToken(reply, request.query.token, {
 		redirectURL: configs.APP_CONFIRM_EMAIL_REDIRECT,
 	});
@@ -126,6 +130,7 @@ const confirmEmailTokenRedirect = async (request, reply) => {
 // @desc 	Route to confirm email address with the token
 // @access 	Public
 const confirmEmail = async (request, reply) => {
+	request.log.info("handlers/confirmEmail");
 	const user = request.userModel;
 	user.confirmEmailToken = undefined;
 	user.confirmEmailTokenExpire = undefined;
@@ -142,6 +147,8 @@ const confirmEmail = async (request, reply) => {
 // @desc	Request to send confirmation email again
 // @access 	Public
 const requestConfirmationEmail = async (request, reply) => {
+	request.log.info("handlers/requestConfirmationEmail");
+
 	const user = request.userModel;
 	if (user.isEmailConfirmed) {
 		return sendErrorResponse(reply, 400, "Email already confirmed");
@@ -179,6 +186,8 @@ const requestConfirmationEmail = async (request, reply) => {
 // @desc	 Request to send reset password email
 // @access	 Public
 const requestResetPasswordToken = async (request, reply) => {
+	request.log.info("handlers/requestResetPasswordToken");
+
 	const user = request.userModel;
 
 	if (!user.isPwResetTokenExpired()) {
@@ -214,6 +223,8 @@ const requestResetPasswordToken = async (request, reply) => {
 //		  	verifies the token and redirects to frontend
 // @access 	Public
 const resetPasswordTokenRedirect = async (request, reply) => {
+	request.log.info("handlers/resetPasswordTokenRedirect");
+
 	return redirectWithToken(reply, request.query.token, {
 		redirectURL: configs.APP_RESET_PASSWORD_REDIRECT,
 	});
@@ -223,6 +234,8 @@ const resetPasswordTokenRedirect = async (request, reply) => {
 // @desc 	Reset password from token (requested from frontend)
 // @access	Public
 const resetPasswordFromToken = async (request, reply) => {
+	request.log.info("handlers/resetPasswordFromToken");
+
 	const user = request.userModel;
 	let { password, confirmPassword } = request.body;
 	if (password !== confirmPassword) {
@@ -256,6 +269,8 @@ const resetPasswordFromToken = async (request, reply) => {
 //			user is logged in
 // @access	Private (JWT TOKEN is required)
 const updatePassword = async (request, reply) => {
+	request.log.info("handlers/updatePassword");
+
 	const user = request.userModel;
 	const { currentPassword, password, confirmPassword } = request.body;
 	const checkPassword = await user.matchPasswd(currentPassword);
@@ -292,6 +307,8 @@ const updatePassword = async (request, reply) => {
 // @desc 	Route used to get user Info
 // @access	Private(requires JWT token in header)
 const getAccount = async (request, reply) => {
+	request.log.info("handlers/getAccount");
+
 	const user = request.user;
 	return sendSuccessResponse(reply, {
 		statusCode: 200,
@@ -308,6 +325,8 @@ const getAccount = async (request, reply) => {
 // @desc 	Route used to DELETE user account
 // @access	Private(requires JWT token in header)
 const deleteAccount = async (request, reply) => {
+	request.log.info("handlers/deleteAccount");
+
 	const user = request.userModel;
 	const { password } = request.body;
 	const checkPassword = await user.matchPasswd(password);
@@ -343,13 +362,15 @@ const deleteAccount = async (request, reply) => {
 //		 	(refresh token should be used only once)
 // @access 	Private (JWT is not required but refresh token is required)
 const getJWTFromRefresh = async (request, reply) => {
+	request.log.info("handlers/getJWTFromRefresh");
+
 	// Fastify-cookie has a function which can be used to sign & unsign tokens
 	// unsignCookie returns valid, renew & false
 	// valid (boolean) : the cookie has been unsigned successfully
 	// renew (boolean) : the cookie has been unsigned with an old secret
 	// value (string/null) : if the cookie is valid then returns string else null
 
-	const rft = getRftById(request.rtid);
+	const rft = await getRftById(request.rtid);
 	if (!rft) {
 		return sendErrorResponse(reply, 400, "Invalid Refresh Token");
 	}
@@ -384,7 +405,9 @@ const getJWTFromRefresh = async (request, reply) => {
 // @desc	revokes the refresh token. Used when logging out
 // @access  Private(required JWT in authorization header)
 const revokeRefreshToken = async (request, reply) => {
-	const rft = getRftById(request.rtid);
+	request.log.info("handlers/revokeRefreshToken");
+
+	const rft = await getRftById(request.rtid);
 
 	const sendInvalidToken = () => {
 		return sendErrorResponse(reply, 400, "Invalid Refresh Token", {
@@ -429,6 +452,8 @@ const revokeRefreshToken = async (request, reply) => {
 // 			revoke all refreshTokens
 // @access	Private(requires JWT token in header)
 const revokeAllRefreshTokens = async (request, reply) => {
+	request.log.info("handlers/revokeAllRefreshTokens");
+
 	const user = request.userModel;
 	await revokeAllRfTokenByUser(user);
 	return sendSuccessResponse(reply, {

@@ -31,7 +31,7 @@ refreshTokenSchema.methods.getJWT = function () {
 		{
 			rtid: this.rtid,
 		},
-		process.env.JWT_KEY,
+		configs.REFRESH_KEY,
 		{
 			expiresIn: "30d",
 		}

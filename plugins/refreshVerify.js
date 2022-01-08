@@ -6,7 +6,7 @@ const { sendErrorResponse } = require("../utils/responseHelpers");
  * Plugin to verify if the user is refresh JWT token is valid
  * @returns
  */
-const verifyRefresh = (request, reply) => {
+const verifyRefresh = async (request, reply) => {
 	request.log.info(`Verifying If the refresh Token is valid`);
 	request.JWT_TYPE = "refresh";
 
@@ -17,6 +17,7 @@ const verifyRefresh = (request, reply) => {
 	// valid
 	let refreshTokenBody = request.body ? request.body.refreshToken : false;
 	if (!refreshTokenBody) {
+		request.log.info("Refresh Token is in cookie");
 		const refreshTokenCookie = request.cookies.refreshToken;
 		if (!refreshTokenCookie) {
 			return sendErrorResponse(reply, 400, "Missing refresh token in cookie");
@@ -38,7 +39,8 @@ const verifyRefresh = (request, reply) => {
 	} else {
 		token = refreshTokenBody;
 	}
-	const decoded = jwt.verify(token, configs.JWT_KEY);
+	request.log.info("Verifying Refresh(JWT) token");
+	const decoded = jwt.verify(token, configs.REFRESH_KEY);
 	request.rtid = decoded.rtid;
 };
 
