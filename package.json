@@ -1,35 +1,35 @@
 {
-  "name": "simpleauth",
-  "version": "1.0.0",
-  "description": "simple service for user auth",
-  "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@gitlab.com/identity9aks/simpleauth.git"
-  },
-  "author": "Akshay",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://gitlab.com/identity9aks/simpleauth/issues"
-  },
-  "homepage": "https://gitlab.com/identity9aks/simpleauth#readme",
-  "dependencies": {
-    "axios": "^0.21.4",
-    "bcryptjs": "^2.4.3",
-    "dotenv": "^10.0.0",
-    "fastify": "^3.20.2",
-    "fastify-cookie": "^5.3.1",
-    "fastify-cors": "^6.0.2",
-    "fastify-helmet": "^5.3.2",
-    "fastify-swagger": "^4.9.1",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^6.0.1",
-    "mustache": "^4.2.0",
-    "node-cron": "^3.0.0",
-    "nodemailer": "^6.6.3"
-  }
+	"name": "simpleauth",
+	"version": "1.0.0",
+	"description": "Simple authentication service",
+	"main": "app.js",
+	"dependencies": {
+		"axios": "^0.21.4",
+		"bcryptjs": "^2.4.3",
+		"dotenv": "^10.0.0",
+		"fastify": "^3.20.2",
+		"fastify-cookie": "^5.3.1",
+		"fastify-cors": "^6.0.2",
+		"fastify-helmet": "^5.3.2",
+		"fastify-swagger": "^4.9.1",
+		"jsonwebtoken": "^8.5.1",
+		"mongoose": "^6.0.1",
+		"mustache": "^4.2.0",
+		"node-cron": "^3.0.0",
+		"nodemailer": "^6.6.3"
+	},
+	"devDependencies": {},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/aksty/simpleauthservice.git"
+	},
+	"author": "Akshay",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/aksty/simpleauthservice/issues"
+	},
+	"homepage": "https://github.com/aksty/simpleauthservice#readme"
 }
