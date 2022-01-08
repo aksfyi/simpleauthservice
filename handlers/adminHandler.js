@@ -1,5 +1,5 @@
 const { checkConfigs } = require("../configs");
-const { sendSuccessResponse } = require("./responseHelpers");
+const { sendSuccessResponse } = require("../utils/responseHelpers");
 
 // @route	POST /api/v1/admin/configs
 // @desc	Check application configurations

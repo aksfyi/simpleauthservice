@@ -9,6 +9,7 @@ const configs = {
 	// Check https://www.fastify.io/docs/latest/Getting-Started/#your-first-server
 	HOST: process.env.HOST,
 	JWT_KEY: process.env.JWT_KEY,
+	REFRESH_KEY: process.env.REFRESH_KEY,
 	COOKIE_SECRET: process.env.COOKIE_SECRET,
 	PORT: process.env.PORT || 5000,
 	AUTH_SERVICE_HOST:

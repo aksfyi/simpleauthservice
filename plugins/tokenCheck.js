@@ -1,7 +1,7 @@
 const { configs } = require("../configs");
-const { sendErrorResponse } = require("../handlers/responseHelpers");
 const crypto = require("crypto");
-const User = require("../models/user");
+const { User } = require("../models/user");
+const { sendErrorResponse } = require("../utils/responseHelpers");
 
 const tokenCheck = (type, shouldRedirect) => {
 	return async function (request, reply) {

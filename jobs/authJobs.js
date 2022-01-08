@@ -1,6 +1,6 @@
 const cron = require("node-cron");
-const RefreshToken = require("../models/refreshToken");
-const User = require("../models/user");
+const { RefreshToken } = require("../models/refreshToken");
+const { User } = require("../models/user");
 const { executeJob, cronExpressions } = require("./helper");
 
 const authJobsInit = (fastify) => {

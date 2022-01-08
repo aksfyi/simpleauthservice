@@ -22,12 +22,12 @@ const {
 	attachUserWithPassword,
 	checkPasswordLength,
 	checkMailingDisabled,
-	refreshTokenValidation,
 	hCaptchaVerification,
 } = require("../plugins/authHelperPlugins");
 const { tokenCheck } = require("../plugins/tokenCheck");
 const { authenticationSchema } = require("./schemas/authSchema");
 const { configs } = require("../configs");
+const { verifyRefresh } = require("../plugins/refreshVerify");
 
 const authenticationRoutes = async (fastify, opts) => {
 	if (!configs.DISABLE_EMAIL_LOGIN) {
@@ -166,7 +166,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "POST",
 		url: "/refresh",
 		schema: authenticationSchema.refreshJWTToken,
-		preHandler: refreshTokenValidation,
+		preHandler: verifyRefresh,
 		handler: getJWTFromRefresh,
 	});
 
@@ -177,7 +177,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		preHandler: [
 			verifyAuth(["admin", "user"]),
 			checkDeactivated,
-			refreshTokenValidation,
+			verifyRefresh,
 		],
 		handler: revokeRefreshToken,
 	});

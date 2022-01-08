@@ -84,7 +84,7 @@ userSchema.methods.getJWT = function () {
 			// isAccountVerified: this.isAccountVerified,
 			isDeactivated: this.isDeactivated,
 		},
-		process.env.JWT_KEY,
+		configs.JWT_KEY,
 		{
 			expiresIn: "15m",
 		}
@@ -141,4 +141,17 @@ userSchema.methods.isConfirmEmailTokenExpired = function () {
 	return Date.now() >= this.confirmEmailTokenExpire;
 };
 
-module.exports = mongoose.model("User", userSchema);
+// Helper Functions
+
+const User = mongoose.model("User", userSchema);
+
+const hashPasswd = async (passwd) => {
+	const salt = await bcrypt.genSalt(10);
+	hashedPasswd = await bcrypt.hash(passwd, salt);
+	return hashedPasswd;
+};
+
+module.exports = {
+	User,
+	hashPasswd,
+};

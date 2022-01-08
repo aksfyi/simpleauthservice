@@ -1,4 +1,4 @@
-const Jobs = require("../models/jobs");
+const { Jobs } = require("../models/jobs");
 
 const cronExpressions = {
 	REFRESH_TOKEN_DELETE: {

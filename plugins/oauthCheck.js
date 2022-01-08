@@ -1,5 +1,5 @@
 const { configs } = require("../configs");
-const { sendErrorResponse } = require("../handlers/responseHelpers");
+const { sendErrorResponse } = require("../utils/responseHelpers");
 
 const oauthCheck = async (request, reply) => {
 	const { provider } = request.params;
