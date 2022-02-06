@@ -3,6 +3,7 @@
 Simple authentication service written using fastify + mongodb(mongoose)
 
 ## Table of contents
+
 - [Simple Auth Service [UNDER DEVELOPMENT]](#simple-auth-service-under-development)
   - [Table of contents](#table-of-contents)
   - [Features](#features)
@@ -17,23 +18,26 @@ Simple authentication service written using fastify + mongodb(mongoose)
   - [Dependencies](#dependencies)
 
 ## Features
- - [x] Sign up and Login 
- - [x] Email verification
- - [x] Forgot Password
- - [x] Refresh Token Support
- - [x] hCaptcha Verification Support
- - [x] Swagger UI for development environment
+
+- [x] Sign up and Login
+- [x] Email verification
+- [x] Forgot Password
+- [x] Refresh Token Support
+- [x] hCaptcha Verification Support
+- [x] Swagger UI for development environment
 
 ### Login with Oauth2 Providers
+
 - [x] Github
 - [x] Google
+
 ## Setting up Locally
 
- - Clone the repository
- - Run `npm install`
- - Configure Environment variables
- -  Run `npm start`
- 
+- Clone the repository
+- Run `npm install`
+- Configure Environment variables
+- Run `npm start`
+
 ### Configuring Environment variables
 
 | Environment variable                       |                                                                                                                                                                           | Default (If not configured)                                          |
@@ -41,7 +45,6 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | MONGO_URI                                  | MongoDB URI                                                                                                                                                               | -                                                                    |
 | ENVIRONMENT                                | Product environment                                                                                                                                                       | `keywords.DEVELOPMENT_ENV` . Check `configs.js`                      |
 | CHECK_ADMIN                                | Checks if admin user exists when signing up                                                                                                                               | 1 (0 to skip check)                                                  |
-| REFRESH_RESPONSE                           | Sends Refresh Token in response                                                                                                                                           | false (1 to send)                                                    |
 | JWT_KEY                                    | Key used to sign JWT                                                                                                                                                      | -                                                                    |
 | REFRESH_KEY                                | Key used to sign refresh token                                                                                                                                            | -                                                                    |
 | PORT                                       | Application Port                                                                                                                                                          | 5000                                                                 |
@@ -54,6 +57,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 | DISABLE_EMAIL_LOGIN                        | "1" to enable login with only oauth providers                                                                                                                             | false                                                                |
 
 ### SMTP Configuration
+
 Configurations required to send email
 | Environment variable |
 | -------------------- |
@@ -65,6 +69,7 @@ Configurations required to send email
 | FROM_EMAIL           |
 
 ### Configuring Captcha verification
+
 | Environment variable |                                                 |
 | -------------------- | ----------------------------------------------- |
 | HCAPTCHA_SECRET      | Check https://docs.hcaptcha.com/                |
@@ -72,16 +77,14 @@ Configurations required to send email
 
 ### Oauth2 Provider Configurations
 
-| Environment variable     |                                                                           |
-| ------------------------ | ------------------------------------------------------------------------- |
-| [PROVIDER]_CLIENT_ID     |                                                                           |
-| [PROVIDER]_CLIENT_SECRET |                                                                           |
-| [PROVIDER]_REDIRECT_URI  | Frontend URL to which the provider redirects with `code` or error message |
-
-
-
+| Environment variable      |                                                                           |
+| ------------------------- | ------------------------------------------------------------------------- |
+| [PROVIDER]\_CLIENT_ID     |                                                                           |
+| [PROVIDER]\_CLIENT_SECRET |                                                                           |
+| [PROVIDER]\_REDIRECT_URI  | Frontend URL to which the provider redirects with `code` or error message |
 
 ### Application configurations
+
 | Environment Variable        |                                                        |
 | --------------------------- | ------------------------------------------------------ |
 | APP_NAME                    | Application name to be used in emails                  |
@@ -92,9 +95,10 @@ Configurations required to send email
 ## Swagger UI documentation
 
 > Swagger UI allows anyone — be it your development team or your end consumers — to visualize and interact with the API’s resources without having any of the implementation logic in place. It’s automatically generated from your OpenAPI (formerly known as Swagger) Specification, with the visual documentation making it easy for back end implementation and client side consumption.
-https://swagger.io/tools/swagger-ui/
+> https://swagger.io/tools/swagger-ui/
 
 To access API documentation go to `http://localhost:{PORT}/documentation`
+
 ## Dependencies
 
 | Library            | Function                                                                    |
@@ -106,15 +110,13 @@ To access API documentation go to `http://localhost:{PORT}/documentation`
 | fastify-swagger    | Swagger UI                                                                  |
 | fastify-cookie     | A plugin for Fastify that adds support for reading and setting cookies.     |
 | fastify-helmet     | Important security headers for Fastify. It is a tiny wrapper around helmet. |
+| fastify-rate-limit | Rate Limiting                                                               |
+| fastify-csrf       | Csrf protection                                                             |
 | axios              | Sending requests to oauth resource servers                                  |
 | jsonwebtoken       | Generate and verify JSON web tokens                                         |
 | mongoose           | MongoDB ORM                                                                 |
 | mustache           | Process HTML templates for emails                                           |
 | nodemailer         | Send Email                                                                  |
 | node-cron          | Run Cron Jobs                                                               |
-| fastify-rate-limit | Rate Limiting                                                               |
 
 Email templates from https://github.com/wildbit/postmark-templates
-     
-
-

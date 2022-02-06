@@ -9,6 +9,7 @@ const { getSwaggerOptions } = require("./utils/utils");
 const helmet = require("fastify-helmet");
 const { adminRoutes } = require("./routes/admin");
 const { sendSuccessResponse } = require("./utils/responseHelpers");
+const { getRefreshTokenOptns } = require("./models/refreshToken");
 
 // fastify-helmet adds various HTTP headers for security
 if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
@@ -19,8 +20,8 @@ if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
 if (configs.COOKIE_SECRET) {
 	fastify.register(require("fastify-cookie"), {
 		secret: configs.COOKIE_SECRET, // For signing cookies
-		parseOptions: {},
 	});
+	fastify.register(require("fastify-csrf"), getRefreshTokenOptns());
 }
 
 // Enable swagger ui in development environment

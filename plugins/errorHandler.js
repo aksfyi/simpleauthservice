@@ -56,6 +56,10 @@ const getErrorHandler = (fastify) => {
 				message = Object.values(err.errors).map((val) => val.message);
 				statusCode = 400;
 				break;
+			case "ForbiddenError":
+				message = err.message;
+				statusCode = 403;
+				break;
 		}
 
 		// MONGODB : unique key violation
