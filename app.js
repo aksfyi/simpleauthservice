@@ -9,6 +9,9 @@ const { getSwaggerOptions } = require("./utils/utils");
 const helmet = require("fastify-helmet");
 const { adminRoutes } = require("./routes/admin");
 const { sendSuccessResponse } = require("./utils/responseHelpers");
+const { getRefreshTokenOptns } = require("./models/refreshToken");
+const fastifyCsrf = require("fastify-csrf");
+const fastifyCookie = require("fastify-cookie");
 
 // fastify-helmet adds various HTTP headers for security
 if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
@@ -17,10 +20,10 @@ if (!configs.ENVIRONMENT === keywords.DEVELOPMENT_ENV) {
 }
 
 if (configs.COOKIE_SECRET) {
-	fastify.register(require("fastify-cookie"), {
+	fastify.register(fastifyCookie, {
 		secret: configs.COOKIE_SECRET, // For signing cookies
-		parseOptions: {},
 	});
+	fastify.register(fastifyCsrf, getRefreshTokenOptns());
 }
 
 // Enable swagger ui in development environment
@@ -38,7 +41,23 @@ if (configs.ALLOW_CORS_ORIGIN) {
 
 // Use real IP address if x-real-ip header is present
 fastify.addHook("onRequest", async (request, reply) => {
-	request.ipAddress = request.headers["x-real-ip"] || request.ip;
+	request.ipAddress =
+		request.headers["x-real-ip"] || // nginx
+		request.headers["x-client-ip"] || // apache
+		request.ip;
+});
+
+// Rate limits based on IP address
+fastify.register(require("fastify-rate-limit"), {
+	max: 100,
+	timeWindow: "1 minute",
+	keyGenerator: function (req) {
+		return (
+			req.headers["x-real-ip"] || // nginx
+			req.headers["x-client-ip"] || // apache
+			req.ip // fallback to default
+		);
+	},
 });
 
 // Set error Handler

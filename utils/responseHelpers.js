@@ -13,6 +13,9 @@ const sendErrorResponse = (reply, statusCode, message, options = {}) => {
 		case 403:
 			error = "Forbidden";
 			break;
+		case 429:
+			error = "Too many requests";
+			break;
 		default:
 			break;
 	}

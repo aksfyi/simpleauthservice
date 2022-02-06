@@ -34,13 +34,14 @@ const authenticationSchema = {
 		response: {
 			201: getSuccessObject(201, true, "Account successfully created", {
 				token: { type: "string" },
-				refreshToken: {
+				verifyToken: {
 					type: "string",
 				},
 				...getEmailStatusResponse(),
 			}),
 			400: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	signin: {
@@ -67,12 +68,15 @@ const authenticationSchema = {
 		response: {
 			200: getSuccessObject(200, true, "Successful Sign in", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
+				verifyToken: {
+					type: "string",
+				},
 				...getEmailStatusResponse(),
 			}),
 			400: errors[400],
 			500: errors[500],
 			404: errors[404],
+			429: errors[429],
 		},
 	},
 	confirmEmailGet: {
@@ -111,6 +115,7 @@ const authenticationSchema = {
 			200: getSuccessObject(200, true, "Email Successfully confirmed", {}),
 			400: errors[400],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	confirmEmailPost: {
@@ -138,6 +143,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	resetPasswordPost: {
@@ -165,6 +171,7 @@ const authenticationSchema = {
 			400: errors[400],
 			404: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	resetPasswordGet: {
@@ -207,6 +214,7 @@ const authenticationSchema = {
 			}),
 			400: errors[400],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	updatePassword: {
@@ -229,6 +237,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	getAccount: {
@@ -246,6 +255,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	deleteAccount: {
@@ -264,6 +274,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	refreshJWTToken: {
@@ -274,27 +285,37 @@ const authenticationSchema = {
 		body: {
 			type: "object",
 			properties: {
-				refreshToken: {
+				_csrf: {
 					type: "string",
-					description:
-						"Optional (if sent the route uses this instead\
-					 of the one in cookie)",
+					description: "to verify the refresh token (verifyToken)",
 				},
 			},
 		},
 		response: {
 			200: getSuccessObject(200, true, "Refresh token successful", {
 				token: { type: "string" },
-				refreshToken: { type: "string" },
+				verifyToken: {
+					type: "string",
+				},
 			}),
 			400: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	revokeRefreshToken: {
 		description:
 			"Revoke Refresh Token Sent from cookie. Used when logging out users",
 		tags: ["Refresh Token"],
+		body: {
+			type: "object",
+			properties: {
+				_csrf: {
+					type: "string",
+					description: "to verify the refresh token (verifyToken)",
+				},
+			},
+		},
 		security: jwtSecurity,
 		response: {
 			200: getSuccessObject(
@@ -306,6 +327,7 @@ const authenticationSchema = {
 			400: errors[404],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	revokeAll: {
@@ -322,6 +344,7 @@ const authenticationSchema = {
 			400: errors[404],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 };

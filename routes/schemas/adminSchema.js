@@ -11,6 +11,7 @@ const adminSchema = {
 			400: errors[404],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 };

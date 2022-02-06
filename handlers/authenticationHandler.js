@@ -69,6 +69,7 @@ const registerUser = async (request, reply) => {
 		confirmationToken
 	);
 
+	const verifyToken = await reply.generateCsrf();
 	return sendSuccessResponse(
 		reply,
 		{
@@ -77,6 +78,7 @@ const registerUser = async (request, reply) => {
 			token: user.getJWT(),
 			emailSuccess: emailStatus.success,
 			emailMessage: emailStatus.message,
+			verifyToken,
 		},
 		{
 			refreshToken,
@@ -97,7 +99,7 @@ const signin = async (request, reply) => {
 		const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 		const emailStatus = await sendNewLoginEmail(user, request);
-
+		const verifyToken = await reply.generateCsrf();
 		return sendSuccessResponse(
 			reply,
 			{
@@ -106,6 +108,7 @@ const signin = async (request, reply) => {
 				token: user.getJWT(),
 				emailSuccess: emailStatus.success,
 				emailMessage: emailStatus.message,
+				verifyToken,
 			},
 			{
 				refreshToken,
@@ -387,13 +390,14 @@ const getJWTFromRefresh = async (request, reply) => {
 	rft.revoke(request.ipAddress);
 	rft.save();
 	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
-
+	const verifyToken = await reply.generateCsrf();
 	return sendSuccessResponse(
 		reply,
 		{
 			statusCode: 200,
 			message: "Refresh token : successful",
 			token: jwtToken,
+			verifyToken,
 		},
 		{
 			refreshToken: newRefreshToken,

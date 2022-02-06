@@ -1,5 +1,3 @@
-const { configs } = require("../configs");
-
 const getSwaggerOptions = () => {
 	SWAGGER_OPTIONS = {
 		swagger: {

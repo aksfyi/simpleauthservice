@@ -98,6 +98,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			const refreshToken = await getRefreshToken(user, request.ipAddress);
 
 			const emailStatus = await sendNewLoginEmail(user, request);
+			const verifyToken = await reply.generateCsrf();
 			return sendSuccessResponse(
 				reply,
 				{
@@ -106,6 +107,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 					token: user.getJWT(),
 					emailSuccess: emailStatus.success,
 					emailMessage: emailStatus.message,
+					verifyToken,
 				},
 				{ refreshToken }
 			);
@@ -131,6 +133,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 			);
 		}
 		const refreshToken = await getRefreshToken(user, request.ipAddress);
+		const verifyToken = await reply.generateCsrf();
 		return sendSuccessResponse(
 			reply,
 			{
@@ -139,6 +142,7 @@ const oauthLoginHelper = async (request, reply, userInfo) => {
 				token: user.getJWT(),
 				emailSuccess: emailStatus.success,
 				emailMessage: emailStatus.message,
+				verifyToken,
 			},
 			{ refreshToken }
 		);

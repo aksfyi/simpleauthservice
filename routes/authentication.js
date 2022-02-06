@@ -166,6 +166,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "POST",
 		url: "/refresh",
 		schema: authenticationSchema.refreshJWTToken,
+		preValidation: fastify.csrfProtection,
 		preHandler: verifyRefresh,
 		handler: getJWTFromRefresh,
 	});
@@ -174,6 +175,7 @@ const authenticationRoutes = async (fastify, opts) => {
 		method: "PUT",
 		url: "/refresh/revoke",
 		schema: authenticationSchema.revokeRefreshToken,
+		preValidation: fastify.csrfProtection,
 		preHandler: [
 			verifyAuth(["admin", "user"]),
 			checkDeactivated,
