@@ -41,6 +41,7 @@ const authenticationSchema = {
 			}),
 			400: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	signin: {
@@ -73,6 +74,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			404: errors[404],
+			429: errors[429],
 		},
 	},
 	confirmEmailGet: {
@@ -111,6 +113,7 @@ const authenticationSchema = {
 			200: getSuccessObject(200, true, "Email Successfully confirmed", {}),
 			400: errors[400],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	confirmEmailPost: {
@@ -138,6 +141,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	resetPasswordPost: {
@@ -165,6 +169,7 @@ const authenticationSchema = {
 			400: errors[400],
 			404: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	resetPasswordGet: {
@@ -207,6 +212,7 @@ const authenticationSchema = {
 			}),
 			400: errors[400],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	updatePassword: {
@@ -229,6 +235,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	getAccount: {
@@ -246,6 +253,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	deleteAccount: {
@@ -264,6 +272,7 @@ const authenticationSchema = {
 			400: errors[400],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	refreshJWTToken: {
@@ -289,6 +298,7 @@ const authenticationSchema = {
 			}),
 			400: errors[404],
 			500: errors[500],
+			429: errors[429],
 		},
 	},
 	revokeRefreshToken: {
@@ -306,6 +316,7 @@ const authenticationSchema = {
 			400: errors[404],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 	revokeAll: {
@@ -322,6 +333,7 @@ const authenticationSchema = {
 			400: errors[404],
 			500: errors[500],
 			403: errors[403],
+			429: errors[429],
 		},
 	},
 };

@@ -38,7 +38,23 @@ if (configs.ALLOW_CORS_ORIGIN) {
 
 // Use real IP address if x-real-ip header is present
 fastify.addHook("onRequest", async (request, reply) => {
-	request.ipAddress = request.headers["x-real-ip"] || request.ip;
+	request.ipAddress =
+		request.headers["x-real-ip"] || // nginx
+		request.headers["x-client-ip"] || // apache
+		request.ip;
+});
+
+// Rate limits based on IP address
+fastify.register(require("fastify-rate-limit"), {
+	max: 100,
+	timeWindow: "1 minute",
+	keyGenerator: function (req) {
+		return (
+			req.headers["x-real-ip"] || // nginx
+			req.headers["x-client-ip"] || // apache
+			req.ip // fallback to default
+		);
+	},
 });
 
 // Set error Handler

@@ -42,6 +42,11 @@ const responseErrors = {
 		type: "object",
 		properties: getErrorProperties(403, false),
 	},
+	429: {
+		description: "Rate Limit. More than 100 requests per minute",
+		type: "object",
+		properties: getErrorProperties(429, false),
+	},
 };
 
 const jwtSecurity = [

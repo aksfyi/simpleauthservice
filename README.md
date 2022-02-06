@@ -97,21 +97,22 @@ https://swagger.io/tools/swagger-ui/
 To access API documentation go to `http://localhost:{PORT}/documentation`
 ## Dependencies
 
-| Library         | Function                                                                    |
-| --------------- | --------------------------------------------------------------------------- |
-| bcryptjs        | Hashing passwords                                                           |
-| dotenv          | Loading environment variables                                               |
-| fastify         | Fast and low overhead web framework, for Node.js                            |
-| fastify-cors    | Add cors support                                                            |
-| fastify-swagger | Swagger UI                                                                  |
-| fastify-cookie  | A plugin for Fastify that adds support for reading and setting cookies.     |
-| fastify-helmet  | Important security headers for Fastify. It is a tiny wrapper around helmet. |
-| axios           | Sending requests to oauth resource servers                                  |
-| jsonwebtoken    | Generate and verify JSON web tokens                                         |
-| mongoose        | MongoDB ORM                                                                 |
-| mustache        | Process HTML templates for emails                                           |
-| nodemailer      | Send Email                                                                  |
-| node-cron       | Run Cron Jobs                                                               |
+| Library            | Function                                                                    |
+| ------------------ | --------------------------------------------------------------------------- |
+| bcryptjs           | Hashing passwords                                                           |
+| dotenv             | Loading environment variables                                               |
+| fastify            | Fast and low overhead web framework, for Node.js                            |
+| fastify-cors       | Add cors support                                                            |
+| fastify-swagger    | Swagger UI                                                                  |
+| fastify-cookie     | A plugin for Fastify that adds support for reading and setting cookies.     |
+| fastify-helmet     | Important security headers for Fastify. It is a tiny wrapper around helmet. |
+| axios              | Sending requests to oauth resource servers                                  |
+| jsonwebtoken       | Generate and verify JSON web tokens                                         |
+| mongoose           | MongoDB ORM                                                                 |
+| mustache           | Process HTML templates for emails                                           |
+| nodemailer         | Send Email                                                                  |
+| node-cron          | Run Cron Jobs                                                               |
+| fastify-rate-limit | Rate Limiting                                                               |
 
 Email templates from https://github.com/wildbit/postmark-templates
      

@@ -28,6 +28,12 @@ const getErrorHandler = (fastify) => {
 			statusCode = 400;
 		}
 
+		if (reply.statusCode === 429) {
+			statusCode = 429;
+			err = new Error("Rate limit exceeded, retry in 1 minute");
+			message = err.message;
+		}
+
 		switch (err.name) {
 			case "CastError":
 				message = `Resource not found`;
