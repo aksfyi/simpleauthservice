@@ -46,6 +46,8 @@ const userSchema = new mongoose.Schema({
 	pwResetExpire: Date,
 	confirmEmailToken: String,
 	confirmEmailTokenExpire: Date,
+	loginWithEmailToken: String,
+	loginWithEmailTokenExpire: Date,
 
 	// No support as of now
 
@@ -122,7 +124,7 @@ userSchema.methods.isPwResetTokenExpired = function () {
 userSchema.methods.getEmailConfirmationToken = function () {
 	const confirmationToken = crypto.randomBytes(30).toString("hex");
 
-	// Store the hash of the resetPasswdToken
+	// Store the hash of the confirmationToken
 	this.confirmEmailToken = crypto
 		.createHash("sha256")
 		.update(confirmationToken)
@@ -132,6 +134,28 @@ userSchema.methods.getEmailConfirmationToken = function () {
 	this.confirmEmailTokenExpire = Date.now() + 60 * 60 * 1000;
 
 	return confirmationToken;
+};
+
+userSchema.methods.getLoginEmailToken = function () {
+	const loginWithEmailToken = crypto.randomBytes(30).toString("hex");
+
+	// Store the hash of the loginWithEmailToken
+	this.loginWithEmailToken = crypto
+		.createHash("sha256")
+		.update(loginWithEmailToken)
+		.digest("hex");
+
+	// Set token expiration to 10 minutes from now
+	this.loginWithEmailTokenExpire = Date.now() + 10 * 60 * 1000;
+
+	return loginWithEmailToken;
+};
+
+userSchema.methods.isLoginEmailTokenExpired = function () {
+	if (!this.loginWithEmailTokenExpire) {
+		return true;
+	}
+	return Date.now() >= this.loginWithEmailTokenExpire;
 };
 
 userSchema.methods.isConfirmEmailTokenExpired = function () {

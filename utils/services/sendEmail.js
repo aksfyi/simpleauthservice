@@ -7,6 +7,7 @@ const {
 } = require("../emailTemplates/passwordChanged");
 const { confirmEmailTemplate } = require("../emailTemplates/confirmEmail");
 const { resetPasswordTemplate } = require("../emailTemplates/resetPassword");
+const loginWithEmailTemplate = require("../emailTemplates/loginwithemail");
 
 const sendEmail = async (options) => {
 	if (configs.DISABLE_MAIL) {
@@ -68,6 +69,29 @@ const confirmationEmailHelper = async (user, request, confirmationToken) => {
 				appDomain: configs.APP_DOMAIN,
 			},
 			confirmEmailTemplate
+		),
+	});
+};
+
+// Send Login mail to the user
+const loginWithEmailHelper = async (user, request, loginToken) => {
+	const loginUrl = `${configs.HTTP_PROTOCOL || request.protocol}://${
+		request.hostname
+	}/api/v1/auth/emailLogin?token=${loginToken}`;
+
+	return await sendEmail({
+		email: user.email,
+		subject: `Login your email address ${
+			configs.APP_NAME ? `to get started on ${configs.APP_NAME}` : ""
+		}`,
+		html: renderTemplate(
+			{
+				username: user.name,
+				buttonHREF: loginUrl,
+				appName: configs.APP_NAME,
+				appDomain: configs.APP_DOMAIN,
+			},
+			loginWithEmailTemplate
 		),
 	});
 };
@@ -142,4 +166,5 @@ module.exports = {
 	passwordResetEmailHelper,
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
+	loginWithEmailHelper,
 };

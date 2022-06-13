@@ -20,6 +20,7 @@ Simple authentication service written using fastify + mongodb(mongoose)
 ## Features
 
 - [x] Sign up and Login
+- [x] Login with email
 - [x] Email verification
 - [x] Forgot Password
 - [x] Refresh Token Support
@@ -85,12 +86,13 @@ Configurations required to send email
 
 ### Application configurations
 
-| Environment Variable        |                                                        |
-| --------------------------- | ------------------------------------------------------ |
-| APP_NAME                    | Application name to be used in emails                  |
-| APP_DOMAIN                  | Frontend host / Application home                       |
-| APP_CONFIRM_EMAIL_REDIRECT  | Frontend URL to which email confirmation is redirected |
-| APP_RESET_PASSWORD_REDIRECT | Frontend URL to which password reset is redirected     |
+| Environment Variable         |                                                        |
+| ---------------------------- | ------------------------------------------------------ |
+| APP_NAME                     | Application name to be used in emails                  |
+| APP_DOMAIN                   | Frontend host / Application home                       |
+| APP_CONFIRM_EMAIL_REDIRECT   | Frontend URL to which email confirmation is redirected |
+| APP_RESET_PASSWORD_REDIRECT  | Frontend URL to which password reset is redirected     |
+| APP_LOGIN_WTH_EMAIL_REDIRECT | Frontend URL to which login with email is redirected   |
 
 ## Swagger UI documentation
 

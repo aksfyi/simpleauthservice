@@ -99,6 +99,25 @@ const authenticationSchema = {
 			},
 		},
 	},
+	loginWithEmailGet: {
+		description: "Check if login token is valid",
+		tags: ["Sign In and Sign Up"],
+		querystring: {
+			type: "object",
+			properties: {
+				token: { type: "string" },
+			},
+			required: ["token"],
+		},
+		response: {
+			302: {
+				type: "object",
+				description: `Redirects to ${configs.APP_LOGIN_WTH_EMAIL_REDIRECT} .Success response will have success:true\
+				and token value added as query parameters.\
+				Failure value will have success:false error & message`,
+			},
+		},
+	},
 	confirmEmailPut: {
 		description:
 			"Check if the confirm email token is valid, update the user document\
@@ -138,6 +157,37 @@ const authenticationSchema = {
 		},
 		response: {
 			200: getSuccessObject(200, true, "Confirmation email sent", {
+				...getEmailStatusResponse(),
+			}),
+			400: errors[400],
+			500: errors[500],
+			403: errors[403],
+			429: errors[429],
+		},
+	},
+	loginWithEmailPost: {
+		description: "Request for link to login with email address",
+		tags: ["Sign In and Sign Up"],
+		body: {
+			type: "object",
+			properties: {
+				email: {
+					type: "string",
+					example: "example@example.com",
+					format: "email",
+				},
+				hToken: {
+					type: "string",
+					example: "10000000-aaaa-bbbb-cccc-000000000001",
+				},
+				name: {
+					type: "string",
+				},
+			},
+			required: ["email"],
+		},
+		response: {
+			200: getSuccessObject(200, true, "Login email sent", {
 				...getEmailStatusResponse(),
 			}),
 			400: errors[400],

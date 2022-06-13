@@ -13,6 +13,8 @@ const {
 	revokeAllRefreshTokens,
 	getAccount,
 	deleteAccount,
+	requestLoginWithEmail,
+	loginWithEmail,
 } = require("../handlers/authenticationHandler");
 const { verifyAuth } = require("../plugins/authVerify");
 const {
@@ -122,6 +124,22 @@ const authenticationRoutes = async (fastify, opts) => {
 			checkDeactivated,
 		],
 		handler: requestConfirmationEmail,
+	});
+
+	fastify.route({
+		method: "POST",
+		url: "/emailLogin",
+		schema: authenticationSchema.loginWithEmailPost,
+		preHandler: [hCaptchaVerification, checkMailingDisabled],
+		handler: requestLoginWithEmail,
+	});
+
+	fastify.route({
+		method: "GET",
+		url: "/emailLogin",
+		preHandler: tokenCheck("loginWithEmail", true),
+		schema: authenticationSchema.loginWithEmailGet,
+		handler: loginWithEmail,
 	});
 
 	// Route to confirm the email address by sending token

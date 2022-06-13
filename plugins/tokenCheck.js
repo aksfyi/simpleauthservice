@@ -34,6 +34,15 @@ const tokenCheck = (type, shouldRedirect) => {
 					);
 				}
 				redirectURL = configs.APP_CONFIRM_EMAIL_REDIRECT;
+			} else if (type === "loginWithEmail") {
+				if (!configs.APP_CONFIRM_EMAIL_REDIRECT) {
+					return sendErrorResponse(
+						reply,
+						500,
+						"Please configure APP_LOGIN_WTH_EMAIL_REDIRECT"
+					);
+				}
+				redirectURL = configs.APP_LOGIN_WTH_EMAIL_REDIRECT;
 			}
 		}
 
@@ -54,6 +63,11 @@ const tokenCheck = (type, shouldRedirect) => {
 				isDeactivated: false,
 				isEmailConfirmed: false,
 			});
+		} else if (type === "loginWithEmail") {
+			user = await User.findOne({
+				loginWithEmailToken: hashedToken,
+				isDeactivated: false,
+			});
 		}
 
 		if (!user) {
@@ -63,6 +77,8 @@ const tokenCheck = (type, shouldRedirect) => {
 			check = user.isPwResetTokenExpired();
 		} else if (type === "confirmEmail") {
 			check = user.isConfirmEmailTokenExpired();
+		} else if (type === "loginWithEmail") {
+			check = user.isLoginEmailTokenExpired();
 		}
 
 		if (check) {
