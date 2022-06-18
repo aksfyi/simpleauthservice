@@ -5,12 +5,14 @@ const {
 	passwordChangedEmailAlert,
 	sendNewLoginEmail,
 	passwordResetEmailHelper,
+	loginWithEmailHelper,
 } = require("../utils/services/sendEmail");
 const {
 	RefreshToken,
 	getRefreshToken,
 	revokeAllRfTokenByUser,
 	getRftById,
+	getRefreshTokenOptns,
 } = require("../models/refreshToken");
 const { User, hashPasswd } = require("../models/user");
 const {
@@ -117,6 +119,79 @@ const signin = async (request, reply) => {
 	} else {
 		return sendErrorResponse(reply, 400, "Password Does not match");
 	}
+};
+
+// @route	POST /api/v1/auth/emailLogin
+// @desc	Request to sign in or sign up with email
+// @access 	Public
+const requestLoginWithEmail = async (request, reply) => {
+	request.log.info("handlers/requestLoginWithEmail");
+
+	const { name, email } = request.body;
+	let role = "user";
+	let provider = "email-passwordless";
+
+	let user = await User.findOne({
+		email: email,
+	});
+
+	if (!user && !name) {
+		return sendErrorResponse(reply, 400, "Name missing");
+	} else if (!user) {
+		// Set Role to admin if no users exist
+		if (configs.CHECK_ADMIN) {
+			const count = await User.countDocuments();
+			if (!count) {
+				role = "admin";
+			}
+		}
+
+		user = await User.create({
+			name,
+			uid: crypto.randomBytes(15).toString("hex"),
+			email,
+			role,
+			provider,
+		});
+	}
+
+	const loginWithEmailToken = user.getLoginEmailToken();
+	user.save({ validateBeforeSave: false });
+
+	const emailStatus = await loginWithEmailHelper(
+		user,
+		request,
+		loginWithEmailToken
+	);
+
+	if (!emailStatus.success) {
+		return sendErrorResponse(reply, 500, emailStatus.message);
+	}
+
+	return sendSuccessResponse(reply, {
+		statusCode: 200,
+		message: emailStatus.message,
+		emailSuccess: emailStatus.success,
+		emailMessage: emailStatus.message,
+	});
+};
+
+// @route 	GET /api/v1/auth/emailLogin
+// @desc	Endpoint set token and redirect user to login
+// @access	Public (confirm email with the token . JWT is NOT required)
+const loginWithEmail = async (request, reply) => {
+	request.log.info("handlers/confirmEmailTokenRedirect");
+	const user = request.userModel;
+	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
+	const verifyToken = await reply.generateCsrf();
+	user.loginWithEmailToken = undefined;
+	user.loginWithEmailTokenExpire = undefined;
+	user.isEmailConfirmed = true;
+	user.save({ validateBeforeSave: false });
+	reply.setCookie("refreshToken", newRefreshToken, getRefreshTokenOptns());
+	return redirectWithToken(reply, verifyToken, {
+		redirectURL: configs.APP_LOGIN_WTH_EMAIL_REDIRECT,
+	});
 };
 
 // @route 	GET /api/v1/auth/confirmEmail
@@ -481,4 +556,6 @@ module.exports = {
 	revokeAllRefreshTokens,
 	getAccount,
 	deleteAccount,
+	requestLoginWithEmail,
+	loginWithEmail,
 };

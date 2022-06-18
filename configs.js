@@ -45,6 +45,7 @@ const configs = {
 	APP_DOMAIN: process.env.APP_DOMAIN || "",
 	APP_CONFIRM_EMAIL_REDIRECT: process.env.APP_CONFIRM_EMAIL_REDIRECT,
 	APP_RESET_PASSWORD_REDIRECT: process.env.APP_RESET_PASSWORD_REDIRECT,
+	APP_LOGIN_WTH_EMAIL_REDIRECT: process.env.APP_LOGIN_WTH_EMAIL_REDIRECT,
 
 	APP_DETAILS_CONFIGURED:
 		process.env.APP_NAME &&
@@ -57,7 +58,7 @@ const configs = {
 	// Internal Oauth2 provider configs
 	PROVIDER_GITHUB: "github",
 	PROVIDER_GOOGLE: "google",
-	SUPPORTED_PROVIDERS: ["github", "google"],
+	SUPPORTED_PROVIDERS: ["github", "google", "email-passwordless"],
 
 	GITHUB_CONFIGS: {
 		ACCESS_TOKEN: "https://github.com/login/oauth/access_token",
