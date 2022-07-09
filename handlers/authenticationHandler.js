@@ -136,7 +136,11 @@ const requestLoginWithEmail = async (request, reply) => {
 	});
 
 	if (!user && !name) {
-		return sendErrorResponse(reply, 400, "Name missing");
+		return sendErrorResponse(
+			reply,
+			400,
+			"Account not found. Please create your account."
+		);
 	} else if (!user) {
 		// Set Role to admin if no users exist
 		if (configs.CHECK_ADMIN) {
@@ -154,7 +158,14 @@ const requestLoginWithEmail = async (request, reply) => {
 			provider,
 		});
 	}
-
+	if (!user.isLoginEmailTokenExpired()) {
+		return sendErrorResponse(
+			reply,
+			400,
+			"Login email was recently sent to your email. Check Spam/Promotions folder.\
+			 Please request again after some time."
+		);
+	}
 	const loginWithEmailToken = user.getLoginEmailToken();
 	user.save({ validateBeforeSave: false });
 
@@ -170,7 +181,8 @@ const requestLoginWithEmail = async (request, reply) => {
 
 	return sendSuccessResponse(reply, {
 		statusCode: 200,
-		message: emailStatus.message,
+		message:
+			"Login link was sent to your email address. Please check your inbox to continue.",
 		emailSuccess: emailStatus.success,
 		emailMessage: emailStatus.message,
 	});
