@@ -192,7 +192,7 @@ const requestLoginWithEmail = async (request, reply) => {
 // @desc	Endpoint set token and redirect user to login
 // @access	Public (confirm email with the token . JWT is NOT required)
 const loginWithEmail = async (request, reply) => {
-	request.log.info("handlers/confirmEmailTokenRedirect");
+	request.log.info("handlers/loginWithEmail");
 	const user = request.userModel;
 	const newRefreshToken = await getRefreshToken(user, request.ipAddress);
 	const verifyToken = await reply.generateCsrf();
