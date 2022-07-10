@@ -75,7 +75,7 @@ const getRefreshTokenOptns = () => {
 		httpOnly: true,
 		path: "/api/v1/auth/refresh",
 		signed: true,
-		sameSite: false,
+		SameSite: "none",
 	};
 	if (configs.ENVIRONMENT === keywords.PRODUCTION_ENV) {
 		options.secure = true;
