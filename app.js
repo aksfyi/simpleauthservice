@@ -23,7 +23,9 @@ if (configs.COOKIE_SECRET) {
 	fastify.register(fastifyCookie, {
 		secret: configs.COOKIE_SECRET, // For signing cookies
 	});
-	fastify.register(fastifyCsrf, getRefreshTokenOptns());
+	fastify.register(fastifyCsrf, {
+		cookieOpts: getRefreshTokenOptns(),
+	});
 }
 
 // Enable swagger ui in development environment
