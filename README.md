@@ -1,10 +1,10 @@
-﻿# Simple Auth Service [UNDER DEVELOPMENT]
+﻿# Simple Auth Service
 
 Simple authentication service written using fastify + mongodb(mongoose)
 
 ## Table of contents
 
-- [Simple Auth Service [UNDER DEVELOPMENT]](#simple-auth-service-under-development)
+- [Simple Auth Service](#simple-auth-service)
   - [Table of contents](#table-of-contents)
   - [Features](#features)
     - [Login with Oauth2 Providers](#login-with-oauth2-providers)
